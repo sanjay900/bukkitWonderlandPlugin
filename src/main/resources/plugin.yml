@@ -1,0 +1,13 @@
+name: WonderlandPlugin
+main: com.sanjay900.wonderland.Wonderland
+version: 0.1
+load: STARTUP
+depend: [EyrePlugin, ProtocolLib, Citizens, WorldEdit]
+commands:
+   wl:
+      description: Wonderland commands
+      aliases: [wonderland, wonder]
+      usage: type /wl for help
+   plot:
+      description: Plot management commands
+      usage: type /plot for help
