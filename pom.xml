@@ -15,16 +15,16 @@
 			<url>http://ci.hawkfalcon.com/plugin/repository/everything/</url>
 		</repository>
 		<repository>
-			<id>Plugin Metrics</id>
-			<url>http://repo.mcstats.org/content/repositories/public</url>
-		</repository>
-		<repository>
 			<id>sk89q-repo</id>
 			<url>http://maven.sk89q.com/repo/</url>
 		</repository>
 		<repository>
 			<id>Citizens</id>
-			<url>http://ci.citizensnpcs.co/plugin/repository/everything/</url>
+			<url>http://ci.citizensnpcs.co/plugin/repository/project/Citizens2/LastSuccessful/repository/</url>
+		</repository>
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 		<repository>
 			<id>sanjay900-repo</id>
@@ -53,23 +53,21 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.gmail.filoghost</groupId>
-			<artifactId>hologr5ams</artifactId>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/spigot.jar</systemPath>
-			<version>1.8-R0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>com.gmail.filoghost</groupId>
-			<artifactId>holograms</artifactId>
-			<scope>system</scope>
-			<systemPath>${basedir}/lib/citizens.jar</systemPath>
-			<version>1.8-R0.1-SNAPSHOT</version>
-		</dependency>
-		<dependency>
 			<groupId>com.sanjay900</groupId>
 			<artifactId>nmsUtil-Plugin</artifactId>
 			<version>1.2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot</artifactId>
+			<scope>provided</scope>
+			<version>1.8-R0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>net.citizensnpcs</groupId>
+			<artifactId>Citizens</artifactId>
+			<scope>provided</scope>
+			<version>2.0.14-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
