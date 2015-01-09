@@ -44,11 +44,7 @@ public class Wonderland extends JavaPlugin {
     	
     	getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
             public void run() {
-        		if (!NMSUtil.checkVersion()) {
-        			Bukkit.getLogger().warning("Wonderland does not support this version of Bukkit, and as a result the cube is broken.");
-        			Bukkit.getLogger().warning("Please don't report problems with the cube to the developers since you are using an unsupported version.");
-        		}
-        		nmsutils = new NMSUtil(Wonderland.this);
+        		nmsutils = (NMSUtil) Bukkit.getPluginManager().getPlugin("nmsUtil");
             	for (World w: Bukkit.getWorlds()) {
             		nmsutils.registerWorld(w);	
         		}
