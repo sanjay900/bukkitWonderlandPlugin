@@ -7,7 +7,7 @@ import com.sanjay900.wonderland.Wonderland;
 
 public class BlockHologram extends Hologram{
 	public BlockHologram(Wonderland plugin, Location location, String id) {
-		super(plugin, location, Integer.valueOf(id.split(":")[0]), id.split(":").length>1?Integer.valueOf(id.split(":")[1]):0, HologramType.BlockHologram);
+		this(plugin, location, id, HologramType.BlockHologram);
 	}
 	public BlockHologram(Wonderland plugin, Location location, String id,
 			HologramType type) {

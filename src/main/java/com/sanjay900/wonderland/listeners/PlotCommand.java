@@ -299,17 +299,17 @@ public class PlotCommand implements CommandExecutor {
 			return true;
 		}
 		if (args[0].equalsIgnoreCase("pos2")) {
-			plot.setStartLoc(((Player)sender).getLocation(),1);
+			plot.setStartLoc(((Player)sender).getLocation(),2);
 			plot.save();
 			return true;
 		}
 		if (args[0].equalsIgnoreCase("pos3")) {
-			plot.setStartLoc(((Player)sender).getLocation(),1);
+			plot.setStartLoc(((Player)sender).getLocation(),3);
 			plot.save();
 			return true;
 		}
 		if (args[0].equalsIgnoreCase("pos4")) {
-			plot.setStartLoc(((Player)sender).getLocation(),1);
+			plot.setStartLoc(((Player)sender).getLocation(),4);
 			plot.save();
 			return true;
 		}

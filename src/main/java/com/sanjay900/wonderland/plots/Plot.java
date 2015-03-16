@@ -15,11 +15,9 @@ import lombok.Setter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.trait.WolfModifiers;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -32,6 +30,7 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -77,6 +76,7 @@ public class Plot{
 	private int collectedKeys;
 	private int collectedBonuses;
 	private int playerCount = 4;
+	private Scoreboard board;
 	public HashMap<EntityFireballImpl, Block> fireballs = new HashMap<>();
 	public Plot(int coordX, int coordZ, World world) {
 		if (!(world.getGenerator() instanceof WonderlandChunkGen)) return;
@@ -133,14 +133,13 @@ public class Plot{
 		npcs = new NPC[playerCount];
 		Location corner = new Location(world,coordX*getWidth()*16+10,3,coordX*getWidth()*16+10);
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		for (int i = 1; i <=playerCount;i++) {
-			this.startLoc[i-1]=corner.clone();
-			NPC wolf = registry.createNPC(EntityType.WOLF, "Player "+i+" Spawn");
-			WolfModifiers trait = wolf.getTrait(WolfModifiers.class);
-			trait.setCollarColor(DyeColor.getByData((byte)i));
+		for (int i = 0; i <playerCount;i++) {
+			this.startLoc[i]=corner.clone();
+			NPC wolf = registry.createNPC(EntityType.PLAYER, "Player "+(i+1)+" Spawn");
 			wolf.spawn(corner);
-			npcs[i-1] = wolf;
+			npcs[i] = wolf;
 		}
+		this.playerCount = playerCount;
 	}
 	public int getKeys() {
 		int keys = 0;
@@ -179,7 +178,7 @@ public class Plot{
 	}
 
 	public void save() {
-		plugin.pl.updateScoreboards(this);
+		//plugin.pl.updateScoreboards(this);
 		plugin.plotManager.savePlot(this);
 	}
 	public boolean setType(final PlotType type) {
@@ -213,6 +212,7 @@ public class Plot{
 
 				}
 
+				@SuppressWarnings("deprecation")
 				private void replaceBlocks(WallType type,
 						WallType lasttype) {
 					EditSession es = WorldEdit.getInstance().getEditSessionFactory().getEditSession(new BukkitWorld(world), 4096);
@@ -245,6 +245,7 @@ public class Plot{
 	public int getChunkZ() {
 		return coordZ*getWidth();
 	}
+	@SuppressWarnings("deprecation")
 	public void replaceBlocks(MaterialData orig, MaterialData replace) {
 		EditSession es = WorldEdit.getInstance().getEditSessionFactory().getEditSession(new BukkitWorld(world), 4096);
 		CuboidRegion r = new CuboidRegion(new Vector((getChunkX()*16)+7,3,(getChunkZ()*16)+7),new Vector((getChunkX()*16)+getGenerator().size-1,getGenerator().height-1,(getChunkZ()*16)+getGenerator().size-1));
@@ -343,6 +344,10 @@ public class Plot{
 				p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,100 ,1));
 				p.setWalkSpeed(0);
 			}
+
+			for (Hologram h :holograms) {
+				h.reset();
+			}
 			Bukkit.getScheduler().runTaskLater(plugin, new Runnable(){
 
 				@Override
@@ -350,7 +355,7 @@ public class Plot{
 					status = PlotStatus.STARTED;
 					for (Player p: pls) {
 						p.removePotionEffect(PotionEffectType.BLINDNESS);
-						p.setWalkSpeed(1);
+						p.setWalkSpeed(0.2f);
 					}
 					for (WonderlandEntity e: entities) {
 						e.spawn();
@@ -400,6 +405,7 @@ public class Plot{
 		STOPPED,STARTING,STARTED
 	}
 	@Getter
+	@SuppressWarnings("deprecation")
 	public enum PlotType {
 		GARDEN(new MaterialData(Material.LEAVES,(byte) 0),new MaterialData(Material.EMERALD_BLOCK.getId(),(byte) 0),
 				new MaterialData(0,(byte) 0),new MaterialData(Material.GRASS,(byte) 0)),

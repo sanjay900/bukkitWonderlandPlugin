@@ -19,7 +19,8 @@ import com.sanjay900.wonderland.Wonderland;
 
 public class WonderlandPlayer {
 
-
+//TODO: depend on GameAPI (or whatever the fuck its called)
+	
 	private UUID player;
 	private Wonderland plugin;
 	public ArrayList<Button> toggledButtons = new ArrayList<>();
@@ -41,7 +42,7 @@ public class WonderlandPlayer {
 
 	}
 	private void updateScoreboard() {
-		// TODO Auto-generated method stub
+	
 
 	}
 

@@ -2,7 +2,7 @@ name: WonderlandPlugin
 main: com.sanjay900.wonderland.Wonderland
 version: 0.1
 load: STARTUP
-depend: [EyrePlugin, ProtocolLib, Citizens, WorldEdit, nmsUtil]
+depend: [EyrePlugin, ProtocolLib, Citizens, WorldEdit, nmsUtils]
 commands:
    wl:
       description: Wonderland commands

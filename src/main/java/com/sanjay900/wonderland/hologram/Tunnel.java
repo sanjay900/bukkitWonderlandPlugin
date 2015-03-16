@@ -33,10 +33,12 @@ public class Tunnel extends BlockHologram{
 			return null;
 		}
 	}
+	@SuppressWarnings("deprecation")
 	public static PlotType getType(MaterialData md) {
 		if (md.getItemTypeId() == 24 && md.getData() == (byte)1) return PlotType.AZTEC;
 		if (md.getItemTypeId() == 112 && md.getData() == (byte)0) return PlotType.CAVE;
 		if (md.getItemTypeId() == 18 && md.getData() == (byte)1) return PlotType.GARDEN;
+		if (md.getItemTypeId() == 18 && md.getData() == (byte)5) return PlotType.GARDEN;
 		if (md.getItemTypeId() == 98 && md.getData() == (byte)0) return PlotType.SPOOKY;
 		if (md.getItemTypeId() == 5 && md.getData() == (byte)5) return PlotType.WOOD;
 		return null;

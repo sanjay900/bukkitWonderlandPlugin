@@ -1,36 +1,26 @@
 package com.sanjay900.wonderland.listeners;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.util.Util;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Dispenser;
-import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,36 +29,26 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDispenseEvent;
-import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldLoadEvent;
-import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Directional;
 import org.bukkit.material.MaterialData;
-import org.bukkit.material.MonsterEggs;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
-import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -76,8 +56,8 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
+import com.google.common.collect.Sets;
 import com.sanjay900.nmsUtil.fallingblocks.FrozenSand;
-import com.sanjay900.wonderland.utils.FaceUtil;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.entities.Bomb;
 import com.sanjay900.wonderland.entities.Chomper;
@@ -88,17 +68,17 @@ import com.sanjay900.wonderland.hologram.BlockHologram;
 import com.sanjay900.wonderland.hologram.Boulder;
 import com.sanjay900.wonderland.hologram.Box;
 import com.sanjay900.wonderland.hologram.Button;
+import com.sanjay900.wonderland.hologram.Button.ButtonColour;
+import com.sanjay900.wonderland.hologram.Button.ButtonType;
+import com.sanjay900.wonderland.hologram.Button.StarCountdown;
 import com.sanjay900.wonderland.hologram.Electro;
 import com.sanjay900.wonderland.hologram.ElectroConversation;
 import com.sanjay900.wonderland.hologram.Hologram;
 import com.sanjay900.wonderland.hologram.ItemHologram;
 import com.sanjay900.wonderland.hologram.Reflector;
+import com.sanjay900.wonderland.hologram.Reflector.ReflectorType;
 import com.sanjay900.wonderland.hologram.Spike;
 import com.sanjay900.wonderland.hologram.Tunnel;
-import com.sanjay900.wonderland.hologram.Button.ButtonColour;
-import com.sanjay900.wonderland.hologram.Button.ButtonType;
-import com.sanjay900.wonderland.hologram.Button.StarCountdown;
-import com.sanjay900.wonderland.hologram.Reflector.ReflectorType;
 import com.sanjay900.wonderland.listeners.listenerChck.BridgeChecker;
 import com.sanjay900.wonderland.listeners.listenerChck.ConveyorSnowChecker;
 import com.sanjay900.wonderland.player.WonderlandPlayer;
@@ -107,6 +87,7 @@ import com.sanjay900.wonderland.plots.Plot.PlotStatus;
 import com.sanjay900.wonderland.plots.Plot.PlotType;
 import com.sanjay900.wonderland.plots.WonderlandChunkGen;
 import com.sanjay900.wonderland.utils.Cooldown;
+import com.sanjay900.wonderland.utils.FaceUtil;
 import com.sanjay900.wonderland.utils.Utils;
 
 @SuppressWarnings("unused")
@@ -140,12 +121,15 @@ public class PlayerListener extends PacketAdapter implements Listener {
 		plugin.hologramManager.reloadConfig();
 		plugin.plotManager.reloadConfig();
 		plugin.entityManager.reloadConfig();
-		plugin.nmsutils.registerWorld(evt.getWorld());
 	}
 	@EventHandler
-	public void worldUnLoad(WorldUnloadEvent evt) {
-		plugin.nmsutils.deregisterWorld(evt.getWorld().getUID());
+	public void pickup(final PlayerPickupItemEvent event) {
+		if (event.getItem().getVehicle() != null && plugin.nmsutils.getCube(event.getItem().getVehicle())!= null) {
+			event.setCancelled(true);
+			
+		}
 	}
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void blockPlace(final BlockPlaceEvent event) {
 		Plot plot = plugin.plotManager.getPlotInside(event.getBlock().getLocation());
@@ -459,13 +443,15 @@ public class PlayerListener extends PacketAdapter implements Listener {
 			return;
 		}
 	}
-	@EventHandler(priority=EventPriority.HIGHEST)
+	@SuppressWarnings("deprecation")
+	@EventHandler
 	public void onPickUp(InventoryCreativeEvent event)
 	{
 		Player player = (Player)event.getInventory().getHolder();
 
 		ItemStack item = event.getCursor();
-		Block block = player.getTargetBlock(null, 5);
+		Block block = player.getTargetBlock(Sets.newHashSet(Material.values()), 5);
+		System.out.print(block);
 		if ((player.getGameMode().equals(GameMode.CREATIVE)) && (item.getType() != Material.AIR)) {
 			if ((item.getType().isBlock()) && (item.getType() == block.getType()))
 			{
@@ -481,6 +467,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 
 		}
 	}
+	@SuppressWarnings("deprecation")
 	private int getSlot(ItemStack it, Player pl) {
 		for (int i = 0; i < 9; i++) {
 			ItemStack it2 = pl.getInventory().getItem(i);
@@ -497,6 +484,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 		}
 		return item.getType().getMaxDurability() == 0 ? 26 : item.getType().getMaxDurability();
 	}
+	@SuppressWarnings("deprecation")
 	public static ItemStack createItem(ItemStack item, int data)
 	{
 		data = (data = (data + maxDurability(item)) % maxDurability(item)) < 0 ? 0 : data;
@@ -515,8 +503,10 @@ public class PlayerListener extends PacketAdapter implements Listener {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void interact(PlayerInteractEvent e) {
+		if (plugin.playerManager.getPlayer(e.getPlayer())!= null) return;
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK&& !e.hasItem()) {
 			if (plugin.playerManager.getPlayer(e.getPlayer())== null) {
 				Plot p = plugin.plotManager.getPlotWall(e.getClickedBlock().getLocation());
@@ -653,6 +643,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 			return;
 		BlockFace direction = disp.getFacing();
 		if (is != null && is.getType() == Material.FIREBALL) {
+			event.setCancelled(true);
 			if (plugin.plotManager.getPlot(event.getBlock().getLocation()).getStatus()==PlotStatus.STOPPED)
 				plugin.entityManager.fireCannon(event.getBlock());
 		}
@@ -876,9 +867,28 @@ public class PlayerListener extends PacketAdapter implements Listener {
 		return false;
 	}
 
-	public void updateScoreboards(Plot plot) {
+	public void updateScoredboards(Plot plot) {
 		for (Player p : hasScoreboard) {
-			if (plugin.playerManager.getPlayer(p)!= null) return;
+			if (plugin.playerManager.getPlayer(p)!= null) {
+				Scoreboard board = p.getScoreboard();
+				String owner = plot.getOwner()==null?"Nobody":Bukkit.getPlayer(plot.getOwner()).getName();
+				String type = plot.getType().name().toLowerCase();
+				String coords = plot.getCoordX()+","+plot.getCoordZ();
+				String title = plot.getTitle().length()>16?plot.getTitle().substring(0, 16):plot.getTitle();
+				Team team = board.getTeam("coords");
+				if (!coords.equals(team.getSuffix()))
+					return;
+				team = board.getTeam("owner");
+				if (!owner.equals(team.getSuffix()))
+					team.setSuffix(owner);
+				team = board.getTeam("type");
+				if (!type.equals(team.getSuffix()))
+					team.setSuffix(type);
+				team = board.getTeam("title");
+				if (!title.equals(team.getSuffix()))
+					team.setSuffix(title);
+				return;
+			}
 			Scoreboard board = p.getScoreboard();
 			String owner = plot.getOwner()==null?"Nobody":Bukkit.getPlayer(plot.getOwner()).getName();
 			String type = plot.getType().name().toLowerCase();
@@ -898,6 +908,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				team.setSuffix(title);
 		}
 	}
+	
 	public void onPacketReceiving(final PacketEvent event) {
 		final PacketContainer packet = event.getPacket();
 		final int entityID = packet.getIntegers().read(0);	
@@ -911,11 +922,13 @@ public class PlayerListener extends PacketAdapter implements Listener {
 
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				Hologram toDestroy = null;
 				for (Hologram h :plugin.hologramManager.holograms.values()) {
 					if (h.hologram.getBukkitEntity().getEntityId() == entityID) {
+						if (plugin.playerManager.getPlayer(event.getPlayer())!= null ) return;
 						switch (action) {
 						case ATTACK:
 							if (isOwned(event.getPlayer(),h)) {
@@ -923,6 +936,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 							}
 							break;
 						case INTERACT:
+						case INTERACT_AT:
 							if (h instanceof Spike && event.getPlayer().getInventory().getItemInHand().getType() == Material.BEDROCK) {
 								Spike spike = (Spike) h;
 								if (spike.getTime()<5)

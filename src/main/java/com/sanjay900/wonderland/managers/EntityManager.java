@@ -147,7 +147,7 @@ public class EntityManager extends ConfigManager{
 	}
 	public EntityFireballImpl fireCannon(BlockFace face, Location location) {
 		location.getWorld().playEffect(location, Effect.GHAST_SHOOT, 1);
-		EntityFireballImpl f = plugin.nmsutils.createFireball(location.add(0.5,0,0.5), FaceUtil.faceToVector(face));
+		EntityFireballImpl f = plugin.nmsutils.createFireball(location.add(0.5,0.5,0.5), FaceUtil.faceToVector(face));
 		return f;
 		
 	}
