@@ -28,10 +28,9 @@ import com.sanjay900.wonderland.plots.Plot.PlotType;
 import com.sanjay900.wonderland.plots.WonderlandChunkGen;
 
 public class PlotCommand implements CommandExecutor {
-	Wonderland plugin;
+	Wonderland plugin = Wonderland.getInstance();
 	private ConversationFactory conversationFactory;
-	public PlotCommand(Wonderland plugin) {
-		this.plugin = plugin;
+	public PlotCommand() {
 		this.conversationFactory = new ConversationFactory(plugin)
 		.withModality(true)
 		.withPrefix(new SummoningConversationPrefix())

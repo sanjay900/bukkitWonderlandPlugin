@@ -3,7 +3,6 @@ package com.sanjay900.wonderland.listeners;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -24,7 +23,6 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -92,17 +90,16 @@ import com.sanjay900.wonderland.utils.Utils;
 
 @SuppressWarnings("unused")
 public class PlayerListener extends PacketAdapter implements Listener {
-	private Wonderland plugin;
+	private static Wonderland plugin = Wonderland.getInstance();
 	public ConveyorSnowChecker conveyorSnowCheker;
 	private BridgeChecker bridgeChecker;
 	private ArrayList<Player> hasScoreboard = new ArrayList<>();
 
 	ElectroConversation eco;
-	public PlayerListener(Wonderland plugin) {
+	public PlayerListener() {
 		super(plugin,
 				ListenerPriority.NORMAL, 
 				PacketType.Play.Client.USE_ENTITY);
-		this.plugin = plugin;
 
 		this.conveyorSnowCheker = new ConveyorSnowChecker();
 		this.bridgeChecker = new BridgeChecker(plugin);
@@ -124,7 +121,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 	}
 	@EventHandler
 	public void pickup(final PlayerPickupItemEvent event) {
-		if (event.getItem().getVehicle() != null && plugin.nmsutils.getCube(event.getItem().getVehicle())!= null) {
+		if (!event.getItem().getVehicle().hasMetadata("hologramType")) {
 			event.setCancelled(true);
 			
 		}
@@ -390,21 +387,12 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				for (final Block b : SurroundingBlocks(block)){
 					if (CheckBlock(b)){
 						if (b.isBlockIndirectlyPowered()||b.isBlockPowered()){
-
 							if (Utils.getStillConveyor(b)) {
-								Utils.statictoAnimConveyor(b, plugin);
-								if (getHologram(b.getRelative(BlockFace.UP))!=null) {
-									//TODO: move entity around on conveyor start
-									//pushableChecker.checkPushable(getHologram(b.getRelative(BlockFace.UP)), Utils.getConveyor(b));
-								}
+								Utils.statictoAnimConveyor(b, plugin);								
 							}
-
-
 						}
 						else{
-
 							Utils.animToStaticConveyor(b, plugin);
-
 						}
 					}
 				}
@@ -597,20 +585,14 @@ public class PlayerListener extends PacketAdapter implements Listener {
 
 	@EventHandler
 	public void onBlockRedstoneChange(BlockRedstoneEvent event){
-
 		Block block = event.getBlock();
 		for (Block b : SurroundingBlocks(block)){
 			if (CheckBlock(b)){
 				if (b.isBlockIndirectlyPowered()||b.isBlockPowered()){
-
 					Utils.animToStaticConveyor(b, plugin);
-
-
 				}
 				else{
-
 					Utils.animToStaticConveyor(b, plugin);
-
 				}}
 		}
 	}
@@ -927,7 +909,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 			public void run() {
 				Hologram toDestroy = null;
 				for (Hologram h :plugin.hologramManager.holograms.values()) {
-					if (h.hologram.getBukkitEntity().getEntityId() == entityID) {
+					if (h.hologram.getEntityId() == entityID) {
 						if (plugin.playerManager.getPlayer(event.getPlayer())!= null ) return;
 						switch (action) {
 						case ATTACK:
@@ -949,7 +931,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 								Electro electro = (Electro) h;
 								eco.startConversation(event.getPlayer(), electro);
 							}
-							FallingBlock fb = (FallingBlock)h.hologram.getBukkitEntity();
+							FallingBlock fb = (FallingBlock)h.hologram;
 							ItemStack it = new ItemStack(fb.getMaterial(),1,(short)fb.getBlockData());
 							if (!event.getPlayer().getInventory().contains(it))
 								event.getPlayer().getInventory().addItem(it);

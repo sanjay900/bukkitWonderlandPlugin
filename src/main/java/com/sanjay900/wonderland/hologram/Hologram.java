@@ -4,9 +4,11 @@ import java.util.HashMap;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
-import com.sanjay900.nmsUtil.EntityCubeImpl;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.utils.Utils;
 
@@ -14,7 +16,7 @@ public class Hologram {
 	
 	public Location location;
 	public Location slocation;
-	public EntityCubeImpl hologram;
+	public ArmorStand hologram;
 	public Wonderland plugin;
 	public int id;
 	protected int data;
@@ -30,20 +32,20 @@ public class Hologram {
 		spawn();
 	}
 	public void despawn() {
-		hologram.getBukkitEntity().remove();
+		hologram.remove();
 	}
 	public void remove() {
-		hologram.getBukkitEntity().remove();
+		hologram.remove();
 		plugin.hologramManager.removeHologram(this);
 	}
 	public void move(Vector vector) {
 		location = location.add(vector);
-		hologram.getBukkitEntity().teleport(location);
+		hologram.teleport(location);
 		
 	}
 	
 	public void setVelocity(final Vector multiply) {
-		hologram.getBukkitEntity().setVelocity(multiply);
+		hologram.setVelocity(multiply);
 	}
 	public Hologram getHologram(Block oldBlock) {
 		for (Hologram h: plugin.hologramManager.holograms.values()) {
@@ -55,7 +57,7 @@ public class Hologram {
 	}
 	public void teleport(Location location2) {
 		location = location2.clone();
-		hologram.getBukkitEntity().teleport(location);
+		hologram.teleport(location);
 		
 	}
 	public void reset() {
@@ -67,10 +69,10 @@ public class Hologram {
 		}
 	}
 	public void spawn() {
-		HashMap<String,Object> storedData = new HashMap<>();
-		storedData.put("hologramType", this.type);
-		storedData.put("hologram", this);
-		hologram = plugin.nmsutils.createCube(location, id, data, storedData);
+		hologram = plugin.nmsutils.spawnArmorStand(location);
+		hologram.setMetadata("hologramType", new FixedMetadataValue(plugin, this.type));
+		hologram.setMetadata("hologram", new FixedMetadataValue(plugin, this));
+		hologram.setHelmet(new ItemStack(id,0,(short) data));;
 	}
 	public void explode() {
 		if (this instanceof Barrel) {

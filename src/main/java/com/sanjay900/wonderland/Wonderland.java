@@ -2,6 +2,7 @@ package com.sanjay900.wonderland;
 
 import java.util.ArrayList;
 
+import lombok.Getter;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPCRegistry;
 
@@ -33,59 +34,59 @@ public class Wonderland extends JavaPlugin {
 	public EntityManager entityManager;
 	public PlotManager plotManager;
 	public NMSUtil nmsutils;
+	@Getter
+	public static Wonderland instance;
 	@Override
 	public ChunkGenerator getDefaultWorldGenerator(String worldName, String id)
 	{
-	return new WonderlandChunkGen(worldName,id,this);
+		return new WonderlandChunkGen(worldName,id,this);
 	}
 
-    @Override
-    public void onEnable() {
-    	
-    	getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-            public void run() {
-        		nmsutils = (NMSUtil) Bukkit.getPluginManager().getPlugin("nmsUtils");
-            	NPCRegistry registry = CitizensAPI.getNPCRegistry();
-        		registry.deregisterAll();
-        		hologramManager = new HologramManager(Wonderland.this);
-            	playerManager = new PlayerManager();
-            	
-            	pl = new PlayerListener(Wonderland.this);
-                Bukkit.getPluginManager().registerEvents(pl, Wonderland.this);
-                el = new EntityListener(Wonderland.this);
-                Bukkit.getPluginManager().registerEvents(el, Wonderland.this);
-                Wonderland.this.getServer().getMessenger().registerOutgoingPluginChannel(Wonderland.this, "BungeeCord");
-    	plotManager = new PlotManager(Wonderland.this);
-    	plotManager.reloadConfig();
-    	entityManager = new EntityManager(Wonderland.this);
-    	entityManager.reloadConfig();
-    	hologramManager.reloadConfig();
-        getCommand("wl").setExecutor(new WonderCommand(Wonderland.this));
-        getCommand("plot").setExecutor(new PlotCommand(Wonderland.this));
-        ProtocolLibrary.getProtocolManager().addPacketListener(new SoundPacketHandler(Wonderland.this));
-        ProtocolLibrary.getProtocolManager().addPacketListener(pl);
-            }
-            },20);
-    }
+	@Override
+	public void onEnable() {
+		instance = this;
+		getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+			public void run() {
+				nmsutils = (NMSUtil) Bukkit.getPluginManager().getPlugin("nmsUtils");
+				NPCRegistry registry = CitizensAPI.getNPCRegistry();
+				registry.deregisterAll();
+				hologramManager = new HologramManager();
+				playerManager = new PlayerManager();
+				pl = new PlayerListener();
+				Bukkit.getPluginManager().registerEvents(pl, Wonderland.this);
+				el = new EntityListener();
+				Bukkit.getPluginManager().registerEvents(el, Wonderland.this);
+				Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(Wonderland.this, "BungeeCord");
+				plotManager = new PlotManager();
+				plotManager.reloadConfig();
+				entityManager = new EntityManager();
+				entityManager.reloadConfig();
+				hologramManager.reloadConfig();
+				getCommand("wl").setExecutor(new WonderCommand());
+				getCommand("plot").setExecutor(new PlotCommand());
+				ProtocolLibrary.getProtocolManager().addPacketListener(new SoundPacketHandler());
+				ProtocolLibrary.getProtocolManager().addPacketListener(pl);
+			}
+		},20);
+	}
 
-   
-    @Override
-    public void onDisable() {
-    	playerManager.stopAll();
-    	//grass.unhook();
-    	
-    	ProtocolLibrary.getProtocolManager().removePacketListeners(this);
-    	ArrayList<Hologram> hs = new ArrayList<>();
-    	for (Plot p : plotManager.plots) {
-    		for (Hologram h : p.getHolograms()) {
-    			hs.add(h);
-    		}
-    	}
-    	for (Hologram h : hs) {
-    		h.despawn();
-    	}
-    	nmsutils.deregisterAll();
-    }
+
+	@Override
+	public void onDisable() {
+		playerManager.stopAll();
+		//grass.unhook();
+
+		ProtocolLibrary.getProtocolManager().removePacketListeners(this);
+		ArrayList<Hologram> hs = new ArrayList<>();
+		for (Plot p : plotManager.plots) {
+			for (Hologram h : p.getHolograms()) {
+				hs.add(h);
+			}
+		}
+		for (Hologram h : hs) {
+			h.despawn();
+		}
+	}
 
 
 }

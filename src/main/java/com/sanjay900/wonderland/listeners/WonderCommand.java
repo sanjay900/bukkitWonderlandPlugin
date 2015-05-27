@@ -11,14 +11,7 @@ import com.sanjay900.wonderland.hologram.BlockHologram;
 
 
 public class WonderCommand implements CommandExecutor {
-
-
-	Wonderland plugin;
-
-	public WonderCommand(Wonderland wonderland) {
-		plugin = wonderland;
-	}
-
+	Wonderland plugin = Wonderland.getInstance();
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (sender instanceof Player) {
 			if (cmd.getName().equalsIgnoreCase("wl")) {

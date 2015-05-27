@@ -17,8 +17,8 @@ import com.sanjay900.wonderland.plots.Plot.PlotType;
 
 public class PlotManager extends ConfigManager{
 	public ArrayList<Plot> plots = new ArrayList<>();
-	public PlotManager(Wonderland plugin) {
-		super("plots.yml",plugin);
+	public PlotManager() {
+		super("plots.yml");
 	}
 	public ArrayList<Plot> getOwnedPlots(Player pl) {
 		ArrayList<Plot> plots2 = new ArrayList<>();

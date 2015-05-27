@@ -49,7 +49,7 @@ public BukkitTask task;
             Spike.this.dir = 2;
           }
         }
-        Spike.this.hologram.getBukkitEntity().teleport(Spike.this.location);
+        Spike.this.hologram.teleport(Spike.this.location);
       }
     }, 1L, this.time.longValue());
   }

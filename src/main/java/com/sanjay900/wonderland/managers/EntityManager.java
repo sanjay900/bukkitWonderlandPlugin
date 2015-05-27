@@ -13,7 +13,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 
-import com.sanjay900.nmsUtil.EntityFireballImpl;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.entities.Bomb;
 import com.sanjay900.wonderland.entities.Chomper;
@@ -27,8 +26,8 @@ public class EntityManager extends ConfigManager{
 	
 	
 	public HashMap<String,WonderlandEntity> entities = new HashMap<>();
-	public EntityManager(Wonderland plugin) {
-		super("entities.yml",plugin);
+	public EntityManager() {
+		super("entities.yml");
 	}
 	public WonderlandEntity getEntity(int entityID) {
 			for (WonderlandEntity en: entities.values()) {
@@ -135,7 +134,7 @@ public class EntityManager extends ConfigManager{
 		saveConfig();
 		entities.put(id, entity);
 	}
-	public EntityFireballImpl fireCannon(Block b) {
+	public Fireball fireCannon(Block b) {
 		BlockState bs = b.getState();
 		org.bukkit.material.Dispenser disp = (org.bukkit.material.Dispenser) bs
 				.getData();
@@ -145,9 +144,9 @@ public class EntityManager extends ConfigManager{
 		return fireCannon(direction,b.getRelative(direction).getLocation());
 		
 	}
-	public EntityFireballImpl fireCannon(BlockFace face, Location location) {
+	public Fireball fireCannon(BlockFace face, Location location) {
 		location.getWorld().playEffect(location, Effect.GHAST_SHOOT, 1);
-		EntityFireballImpl f = plugin.nmsutils.createFireball(location.add(0.5,0.5,0.5), FaceUtil.faceToVector(face));
+		Fireball f = plugin.nmsutils.createFireball(location.add(0.5,0.5,0.5), FaceUtil.faceToVector(face));
 		return f;
 		
 	}

@@ -10,12 +10,11 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import com.sanjay900.wonderland.Wonderland;
 
 public abstract class ConfigManager {
-	protected Wonderland plugin;
+	protected Wonderland plugin = Wonderland.getInstance();
 	private String fileName;
 	protected FileConfiguration config;
 	protected File configFile = null;
-	public ConfigManager(String fileName, Wonderland plugin) {
-		this.plugin = plugin;
+	public ConfigManager(String fileName) {
 		this.fileName = fileName;
 	}
 	public void reloadConfig() {

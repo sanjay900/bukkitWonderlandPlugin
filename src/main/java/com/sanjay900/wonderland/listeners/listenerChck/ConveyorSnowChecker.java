@@ -2,67 +2,83 @@ package com.sanjay900.wonderland.listeners.listenerChck;
 
 import java.util.HashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import com.sanjay900.wonderland.player.WonderlandPlayer;
-import com.sanjay900.wonderland.utils.FaceUtil;
+import com.sanjay900.nmsUtil.util.V10BlockLocation;
 import com.sanjay900.wonderland.Wonderland;
+import com.sanjay900.wonderland.utils.FaceUtil;
 import com.sanjay900.wonderland.utils.Utils;
 
 public class ConveyorSnowChecker {
-	public HashMap<WonderlandPlayer,Block> flipped= new HashMap<>();
-	public Location checkConveyor(final Block under, final WonderlandPlayer p, final Wonderland plugin) {
+	private BukkitTask task;
+	private Wonderland plugin = Wonderland.getInstance();
+
+	public ConveyorSnowChecker() {
+		task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable(){
+
+			@Override
+			public void run() {
+				for (World w:Bukkit.getWorlds()) {
+					for (Entity en: w.getEntities()){
+						Vector v = checkConveyorAndSnow(en);
+						if (v != null) {
+							en.setVelocity(v.multiply(0.3));
+							if (en instanceof Player) {
+								((Player) en).setWalkSpeed(0);
+							}
+						} else {
+							if (en instanceof Player) {
+								((Player) en).setWalkSpeed((float) 0.2);
+							}
+						}
+					}
+				}
+			}}, 1l, 1l);
+	}
+	public HashMap<Entity,V10BlockLocation> flipped= new HashMap<>();
+	public Vector checkConveyor(Entity en) {
+		Block under = en.getLocation().getBlock().getRelative(BlockFace.DOWN);
 		final BlockFace Conveyor = Utils.getConveyor(under);
 		if (Conveyor != null) {
-			Utils.flipConveyor(under,plugin);
-			Location l = p.getPlayer().getLocation();
-			l.setX(under.getRelative(Conveyor).getRelative(BlockFace.UP).getX()+0.5);
-			l.setZ(under.getRelative(Conveyor).getRelative(BlockFace.UP).getZ()+0.5);
-			l.setDirection(FaceUtil.faceToVector(Conveyor));
-			return l;
-			
+			return FaceUtil.faceToVector(Conveyor);
 		} 
 		return null;
 	}
-	public Location checkSnow(final Block under, final WonderlandPlayer p, Vector v) {
+	public Vector checkSnow(Entity en) {
+		Block under = en.getLocation().getBlock().getRelative(BlockFace.DOWN);
+		Vector v = en.getVelocity();
+		if (en instanceof Player) {
+			v = plugin.nmsutils.calcPlayerVelocity((Player) en);
+		}
 		BlockFace snow = Utils.snow(under, FaceUtil.getDirection(v));
 		if (snow != null) {
-			
-			Location l = under.getRelative(snow).getRelative(BlockFace.UP).getLocation();
-			l.setDirection(FaceUtil.faceToVector(snow));
-			if ((l.getBlock().getType().isSolid()&&!l.getBlock().getType().name().toLowerCase().contains("stair")&&!l.getBlock().getType().name().contains("SIGN"))||l.getBlock().getType()==Material.FLOWER_POT||l.getBlock().getType()==Material.LADDER)  {
-				l = p.getPlayer().getLocation();
-				l.setDirection(FaceUtil.faceToVector(FaceUtil.getDirection(v).getOppositeFace()));
-				return l;
-			}
-			l = l.add(0, l.getBlock().getType().name().toLowerCase().contains("stair")?1:0, 0);
-			l.setDirection(FaceUtil.faceToVector(snow));
-				return l;
-				}
-				
+			return FaceUtil.faceToVector(snow);
+		}
 		return null;
-			
-		
 	}
-	public Location checkConveyorAndSnow(Block under, WonderlandPlayer p, Vector v, Wonderland plugin){
-		Location l = checkConveyor(under, p,plugin );
+	public Vector checkConveyorAndSnow(Entity en){
+		Vector l = checkConveyor(en);
+		V10BlockLocation under = new V10BlockLocation(en.getLocation().getBlock().getRelative(BlockFace.DOWN));
 		if (l != null) {
 			return l;
-		
 		}
-			if (!flipped.containsKey(p) || !Utils.compareLocation(flipped.get(p).getLocation(), under.getLocation())) {
+		if (en instanceof Player && (!flipped.containsKey(en) || !flipped.get(en).equals(under))) {
+			if (flipped.containsKey(en)) flipped.remove(en);
+			if (Utils.getConveyor(under.getHandle().getBlock()) !=null || Utils.getStillConveyor(under.getHandle().getBlock())) {
+				Utils.flipConveyor(under.getHandle().getBlock(),plugin);
+				flipped.put(en, under);
+			}	
+		}
 
-				if (flipped.containsKey(p)) flipped.remove(p);
-				if (Utils.getConveyor(under) !=null || Utils.getStillConveyor(under)) {
-					Utils.flipConveyor(under,plugin);
-					flipped.put(p, under);
-				}	
-			}
-			
-			return checkSnow(under, p, v);
+		return checkSnow(en);
 	}
 }

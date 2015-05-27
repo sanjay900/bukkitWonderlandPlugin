@@ -12,6 +12,6 @@ public class Boulder extends Hologram{
 	@Override
 	public void spawn() {
 		super.spawn();
-		hologram.setStoredData("friction", false);
 	}
 }
+

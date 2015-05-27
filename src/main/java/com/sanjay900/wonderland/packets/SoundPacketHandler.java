@@ -12,9 +12,9 @@ import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.utils.Cooldown;
 
 public class SoundPacketHandler extends PacketAdapter{
-
-	public SoundPacketHandler(Wonderland plugin) {
-		super(plugin, ListenerPriority.NORMAL, PacketType.Play.Server.WORLD_EVENT);
+	
+	public SoundPacketHandler() {
+		super(Wonderland.getInstance(), ListenerPriority.NORMAL, PacketType.Play.Server.WORLD_EVENT);
 		
 	}
 	 @Override

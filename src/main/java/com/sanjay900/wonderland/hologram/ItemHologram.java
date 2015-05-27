@@ -3,6 +3,7 @@ package com.sanjay900.wonderland.hologram;
 import org.bukkit.Location;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import com.sanjay900.wonderland.Wonderland;
 
@@ -21,7 +22,8 @@ public class ItemHologram extends BlockHologram{
 	public void spawn() {
 		super.spawn();
 		item = location.getWorld().dropItem(location, getItemStack());
-		hologram.getBukkitEntity().setPassenger(item);
+		item.setMetadata("hologramType", new FixedMetadataValue(plugin,HologramType.ItemHologram));
+		hologram.setPassenger(item);
 	}
 	@Override
 	public void remove() {

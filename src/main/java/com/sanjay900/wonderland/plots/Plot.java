@@ -25,6 +25,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.conversations.Conversable;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.material.MaterialData;
@@ -37,7 +38,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers.TitleAction;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.sanjay900.nmsUtil.EntityFireballImpl;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.entities.WonderlandEntity;
 import com.sanjay900.wonderland.hologram.Hologram;
@@ -77,7 +77,7 @@ public class Plot{
 	private int collectedBonuses;
 	private int playerCount = 4;
 	private Scoreboard board;
-	public HashMap<EntityFireballImpl, Block> fireballs = new HashMap<>();
+	public HashMap<Fireball, Block> fireballs = new HashMap<>();
 	public Plot(int coordX, int coordZ, World world) {
 		if (!(world.getGenerator() instanceof WonderlandChunkGen)) return;
 		this.world = world;
@@ -374,8 +374,8 @@ public class Plot{
 
 	public void stopGame() {
 		status = PlotStatus.STOPPED;
-		for (Iterator<Entry<EntityFireballImpl, Block>> it = fireballs.entrySet().iterator();it.hasNext();) {
-			it.next().getKey().getBukkitEntity().remove();
+		for (Iterator<Entry<Fireball, Block>> it = fireballs.entrySet().iterator();it.hasNext();) {
+			it.next().getKey().remove();
 			it.remove();
 		}
 		for (WonderlandPlayer pl: players) {
@@ -432,8 +432,8 @@ public class Plot{
 	public void respawn() {
 		if (status != PlotStatus.STARTED) return;
 		status = PlotStatus.STARTING;
-		for (Iterator<Entry<EntityFireballImpl, Block>> it = fireballs.entrySet().iterator();it.hasNext();) {
-			it.next().getKey().getBukkitEntity().remove();
+		for (Iterator<Entry<Fireball, Block>> it = fireballs.entrySet().iterator();it.hasNext();) {
+			it.next().getKey().remove();
 			it.remove();
 		}
 		WrappedChatComponent titlec = WrappedChatComponent.fromChatMessage(title)[0];

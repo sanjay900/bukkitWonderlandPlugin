@@ -39,9 +39,8 @@ public class HologramManager extends ConfigManager{
 		SHARED_ID += 4;
 		return firstId;
 	}
-	public HologramManager(Wonderland plugin) {
-		super("holograms.yml",plugin);
-		this.plugin = plugin;
+	public HologramManager() {
+		super("holograms.yml");
 		electrotask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new Runnable(){
 
 			@Override

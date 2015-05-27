@@ -3,6 +3,7 @@ package com.sanjay900.wonderland.listeners;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
@@ -11,13 +12,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 
-import com.sanjay900.nmsUtil.EntityCubeImpl;
-import com.sanjay900.nmsUtil.EntityFireballImpl;
-import com.sanjay900.nmsUtil.EntityImpl;
-import com.sanjay900.nmsUtil.events.CubeGroundTickEvent;
-import com.sanjay900.nmsUtil.events.EntityCollidedWithEntityImplEvent;
-import com.sanjay900.nmsUtil.events.EntityImplCollideBlockEvent;
-import com.sanjay900.nmsUtil.events.EntityImplCollideEntityImplEvent;
+import com.sanjay900.nmsUtil.events.ArmorStandCollideEvent;
+import com.sanjay900.nmsUtil.events.ArmorStandTickEvent;
+import com.sanjay900.nmsUtil.events.FireballCollideEvent;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.BlockHologram;
@@ -34,14 +31,20 @@ import com.sanjay900.wonderland.plots.Plot.PlotStatus;
 import com.sanjay900.wonderland.utils.FaceUtil;
 
 public class EntityListener implements Listener{
-	private Wonderland plugin;
+	private Wonderland plugin = Wonderland.getInstance();
+	@EventHandler
+	public void fireballCollide(FireballCollideEvent evt) {
+		Fireball fireball = evt.getFireball();
+		Entity collider = evt.getCollider();
+		if (collider.getType() == EntityType.ARMOR_STAND) {
+			ArmorStand cube = (ArmorStand) collider;
+			evt.setCancelled(!fireballCollision((Fireball)fireball,cube));
+		}
 
-	public EntityListener(Wonderland plugin) {
-		this.plugin = plugin;
 	}
 	@EventHandler
-	public void collideEvent(EntityCollidedWithEntityImplEvent evt) {
-		Entity collider = evt.getCollisionEntity();
+	public void collideEvent(ArmorStandCollideEvent evt) {
+		Entity collider = evt.getCollider();
 		if (collider instanceof Player) {
 			Player p = (Player)collider;
 			if (plugin.playerManager.getPlayer(p)== null) {
@@ -50,37 +53,19 @@ public class EntityListener implements Listener{
 			}
 
 		}
-		EntityImpl impl = evt.getImplementedEntity();
-		if (impl instanceof EntityFireballImpl) {
-			EntityFireballImpl fireball = (EntityFireballImpl)impl;
-			if (collider.getType() == EntityType.FALLING_BLOCK) {
-				if (plugin.nmsutils.getCube(collider) != null) {
-					EntityCubeImpl cube = plugin.nmsutils.getCube(collider);
-					evt.setCancelled(!fireballCollision((Fireball)fireball.getBukkitEntity(),cube));
-				}
+		ArmorStand cube = evt.getStand();
 
-			}
-		}
-		if (impl instanceof EntityCubeImpl) {
-			EntityCubeImpl cube = (EntityCubeImpl)impl;
-
-			if (collider.getType() == EntityType.PLAYER) {
-				evt.setCancelled(!playerCollision((Player)collider,cube));
-
-			}
-			if (collider.getType() == EntityType.FALLING_BLOCK) {
-				if (plugin.nmsutils.getCube(collider) != null) {
-					cubecollide(plugin.nmsutils.getCube(collider),cube);
-					evt.setCancelled(true);
-				}
-			}
+		if (collider.getType() == EntityType.PLAYER) {
+			evt.setCancelled(!playerCollision((Player)collider,cube));
 
 		}
-
+		if (collider.getType() == EntityType.ARMOR_STAND && collider.hasMetadata("hologramType")) {
+			cubecollide((ArmorStand) collider,cube);
+			evt.setCancelled(true);
+		}
 	}
-
-	private boolean playerCollision(Player collider, EntityCubeImpl cube) {
-		switch (cube.<HologramType>getStored("hologramType")) {
+	private boolean playerCollision(Player collider, ArmorStand cube) {
+		switch ((HologramType)cube.getMetadata("hologramType").get(0).value()) {
 		case Boulder:
 		case Barrel:		
 		case Box:
@@ -103,14 +88,14 @@ public class EntityListener implements Listener{
 	}
 	public Hologram getHologram(Vector vec,Location l) {
 		for (Hologram h: plugin.hologramManager.holograms.values()) {
-			//System.out.print(h.hologram.getBukkitEntity().getLocation().distanceSquared(l.add(vec)));
-			if (!(h instanceof BlockHologram) && h.hologram.getBukkitEntity().getLocation().distanceSquared(l.add(vec)) < 0.8) {
+			//System.out.print(h.hologram.getLocation().distanceSquared(l.add(vec)));
+			if (!(h instanceof BlockHologram) && h.hologram.getLocation().distanceSquared(l.add(vec)) < 0.8) {
 				return h;
 			}
 		}
 		return null;
 	}
-	public Hologram getHologram(EntityCubeImpl cube) {
+	public Hologram getHologram(ArmorStand cube) {
 		for (Hologram h : plugin.hologramManager.holograms.values()) {
 			if (h.hologram == cube) {
 				return h;
@@ -118,8 +103,8 @@ public class EntityListener implements Listener{
 		}
 		return null;
 	}
-	public boolean fireballCollision(Fireball fireball, EntityCubeImpl cube) {
-		switch (cube.<HologramType>getStored("hologramType")) {
+	public boolean fireballCollision(Fireball fireball, ArmorStand cube) {
+		switch ((HologramType)cube.getMetadata("hologramType").get(0).value()) {
 		case Barrel:
 			((Barrel)getHologram(cube)).explode();
 			return true;
@@ -158,8 +143,8 @@ public class EntityListener implements Listener{
 			case PRISM:
 				Plot p = plugin.plotManager.getPlot(fireball.getLocation());
 				if (p.getStatus() == PlotStatus.STARTED) {
-					cube.getBukkitEntity().getWorld().playSound(cube.getBukkitEntity().getLocation(), Sound.GLASS, 1f, 1f);
-					cube.getBukkitEntity().remove();
+					cube.getWorld().playSound(cube.getLocation(), Sound.GLASS, 1f, 1f);
+					cube.remove();
 				}
 
 				int[] faces = new int[]{2,4};
@@ -187,21 +172,21 @@ public class EntityListener implements Listener{
 
 		}
 	}
-	public void cubecollide(EntityCubeImpl cube, EntityCubeImpl collidecube) {
-		switch (cube.<HologramType>getStored("hologramType")) {
+	public void cubecollide(ArmorStand collider, ArmorStand collidecube) {
+		switch ((HologramType)collider.getMetadata("hologramType").get(0).value()) {
 		case Barrel:
 		case Boulder:
 		case Box:
 		case Reflector:
-			switch (collidecube.<HologramType>getStored("hologramType")) {
+			switch ((HologramType)collidecube.getMetadata("hologramType").get(0).value()) {
 			case Barrel:
 			case Boulder:
 			case Box:
 			case ItemHologram:
 			case Reflector:
 			case Star:
-				collidecube.getBukkitEntity().setVelocity(new Vector(0,0,0));
-				cube.getBukkitEntity().setVelocity(new Vector(0,0,0));
+				collidecube.setVelocity(new Vector(0,0,0));
+				collider.setVelocity(new Vector(0,0,0));
 				break;
 
 			case BlockHologram:
@@ -214,11 +199,11 @@ public class EntityListener implements Listener{
 			}
 			break;
 		case Electro:
-			if (((Electro)getHologram(cube)).isSpawned()) {
+			if (((Electro)getHologram(collider)).isSpawned()) {
 				if (getHologram(collidecube) instanceof Barrel) {
 					((Barrel)getHologram(collidecube)).explode();
 				} else {
-					cube.getBukkitEntity().remove();
+					collider.remove();
 				}
 			}
 			return;
@@ -226,10 +211,10 @@ public class EntityListener implements Listener{
 			Spike s = (Spike)getHologram(collidecube);
 			if (s.getPos() > 0.2 && s.getDir() == 1) {
 				if (((Electro)getHologram(collidecube)).isSpawned()) {
-					if (getHologram(cube) instanceof Barrel) {
-						((Barrel)getHologram(cube)).explode();
+					if (getHologram(collider) instanceof Barrel) {
+						((Barrel)getHologram(collider)).explode();
 					} else {
-						cube.getBukkitEntity().remove();
+						collider.remove();
 					}
 				}
 			}
@@ -238,17 +223,17 @@ public class EntityListener implements Listener{
 		}
 	}
 	@EventHandler
-	public void onGroundTick(CubeGroundTickEvent evt)
+	public void onGroundTick(ArmorStandTickEvent evt)
 	{
-		switch (evt.getCube().<HologramType>getStored("hologramType")) {
+		switch ((HologramType)evt.getArmorStand().getMetadata("hologramType").get(0).value()) {
 		case Barrel:
 		case Box:
 		case Reflector:
-			evt.getCube().getBukkitEntity().setVelocity(evt.getCube().getBukkitEntity().getVelocity().multiply(0.5));
+			evt.getArmorStand().setVelocity(evt.getArmorStand().getVelocity().multiply(0.5));
 			break;
 
 		case Boulder:
-			evt.getCube().getBukkitEntity().setVelocity(evt.getCube().getBukkitEntity().getVelocity());
+			evt.getArmorStand().setVelocity(evt.getArmorStand().getVelocity());
 			break;
 		case Star:
 		case ItemHologram:
@@ -258,27 +243,18 @@ public class EntityListener implements Listener{
 		case Spike:
 		case Tunnel:
 		}
-		switch (evt.getCube().<HologramType>getStored("hologramType")) {
-		case Barrel:
-		case Box:
-		case Reflector:
-		case Boulder:
-			
-			break;
-		default:
-			break;
+		if (evt.getArmorStand().getLocation().add(evt.getArmorStand().getVelocity()).getBlock().getType().isSolid()) {
+			evt.getArmorStand().setVelocity(new Vector(0,0,0));
 		}
-		if (evt.getCube().getBukkitEntity().getLocation().add(evt.getCube().getBukkitEntity().getVelocity()).getBlock().getType().isSolid()) {
-			evt.getCube().getBukkitEntity().setVelocity(new Vector(0,0,0));
-		}
-		if (evt.getCube().<HologramType>getStored("hologramType") == HologramType.Button) {
-			Button bt = (Button)getHologram(evt.getCube());
+		if ((HologramType)evt.getArmorStand().getMetadata("hologramType").get(0).value() == HologramType.Button) {
+			Button bt = (Button)getHologram(evt.getArmorStand());
 			if (bt == null) {
-				evt.getCube().getBukkitEntity().remove();
+				evt.getArmorStand().remove();
 				return;
 			}
 			boolean collision = false;
-			for (Entity en: evt.getCube().getCollidedEntities(bt.type==ButtonType.SQUARE?-0.20000000298023224:-0.3)) {
+			double dist = bt.type==ButtonType.SQUARE?-0.20000000298023224:-0.3;
+			for (Entity en: evt.getArmorStand().getNearbyEntities(dist, dist, dist)) {
 				if (collision == true) {
 					break;
 				}
@@ -286,35 +262,29 @@ public class EntityListener implements Listener{
 					Player p = (Player)en;
 					if (plugin.playerManager.getPlayer(p)!= null) continue;
 				}
-				EntityImpl eni = plugin.nmsutils.getEntity(en);
-				if (eni == null) {
+				if (!en.hasMetadata("hologramType")) {
 					collision = true;
 					break;
 				}
-				if (eni instanceof EntityFireballImpl) {
-					continue;
-				}
-				if (eni instanceof EntityCubeImpl) {
-					EntityCubeImpl cube = (EntityCubeImpl) eni;
-					switch (cube.<HologramType>getStored("hologramType")) {
-					case Barrel:
-					case Boulder:
-					case Box:
-					case Reflector:
-						collision = true;
-						break;
-					case BlockHologram:
-					case Button:
-					case Electro:
-					case ItemHologram:
-					case Spike:
-					case Star:
-					case Tunnel:
-						break;
-					default:
-						break;
+				switch ((HologramType)en.getMetadata("hologramType").get(0).value()) {
+				case Barrel:
+				case Boulder:
+				case Box:
+				case Reflector:
+					collision = true;
+					break;
+				case BlockHologram:
+				case Button:
+				case Electro:
+				case ItemHologram:
+				case Spike:
+				case Star:
+				case Tunnel:
+					break;
+				default:
+					break;
 
-					}
+
 				}
 			}
 			switch (bt.type) {
@@ -340,24 +310,5 @@ public class EntityListener implements Listener{
 
 			}
 		}
-	}
-	public void collideImpl(EntityImplCollideEntityImplEvent evt) {
-		if (evt.getImplementedCollider() instanceof EntityCubeImpl && evt.getImplementedEntity() instanceof EntityCubeImpl) {
-			EntityCubeImpl cube = (EntityCubeImpl) evt.getImplementedCollider();
-			EntityCubeImpl collidecube = (EntityCubeImpl) evt.getImplementedEntity();
-			evt.setCancelled(true);
-			cubecollide(cube,collidecube);
-
-		}
-		if (evt.getImplementedCollider() instanceof EntityFireballImpl && evt.getImplementedEntity() instanceof EntityCubeImpl) {
-			System.out.println("TEST");
-		}
-		if (evt.getImplementedCollider() instanceof EntityCubeImpl && evt.getImplementedEntity() instanceof EntityFireballImpl) {
-			System.out.println("TEST");
-		}
-	}
-	@EventHandler
-	public void blockCollide(EntityImplCollideBlockEvent evt) {
-		evt.getCube().getBukkitEntity().setVelocity(new Vector(0,0,0));
 	}
 }
