@@ -47,6 +47,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -56,6 +57,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
 import com.google.common.collect.Sets;
 import com.sanjay900.nmsUtil.fallingblocks.FrozenSand;
+import com.sanjay900.nmsUtil.util.FaceUtil;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.entities.Bomb;
 import com.sanjay900.wonderland.entities.Chomper;
@@ -85,11 +87,11 @@ import com.sanjay900.wonderland.plots.Plot.PlotStatus;
 import com.sanjay900.wonderland.plots.Plot.PlotType;
 import com.sanjay900.wonderland.plots.WonderlandChunkGen;
 import com.sanjay900.wonderland.utils.Cooldown;
-import com.sanjay900.wonderland.utils.FaceUtil;
 import com.sanjay900.wonderland.utils.Utils;
 
 @SuppressWarnings("unused")
 public class PlayerListener extends PacketAdapter implements Listener {
+	private HashMap<UUID,Vector> lastVelocity = new HashMap<>();
 	private static Wonderland plugin = Wonderland.getInstance();
 	public ConveyorSnowChecker conveyorSnowCheker;
 	private BridgeChecker bridgeChecker;
@@ -242,7 +244,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 
 	@EventHandler 
 	public void playerMove(PlayerMoveEvent evt) {
-
+		lastVelocity.put(evt.getPlayer().getUniqueId(), evt.getTo().toVector().subtract(evt.getFrom().toVector()));
 		if (evt.getTo().getWorld().getGenerator() instanceof WonderlandChunkGen&&plugin.playerManager.getPlayer(evt.getPlayer())== null) {
 			Plot plot = plugin.plotManager.getPlotInside(evt.getTo());
 
@@ -388,11 +390,11 @@ public class PlayerListener extends PacketAdapter implements Listener {
 					if (CheckBlock(b)){
 						if (b.isBlockIndirectlyPowered()||b.isBlockPowered()){
 							if (Utils.getStillConveyor(b)) {
-								Utils.statictoAnimConveyor(b, plugin);								
+								Utils.statictoAnimConveyor(b);								
 							}
 						}
 						else{
-							Utils.animToStaticConveyor(b, plugin);
+							Utils.animToStaticConveyor(b);
 						}
 					}
 				}
@@ -589,10 +591,10 @@ public class PlayerListener extends PacketAdapter implements Listener {
 		for (Block b : SurroundingBlocks(block)){
 			if (CheckBlock(b)){
 				if (b.isBlockIndirectlyPowered()||b.isBlockPowered()){
-					Utils.animToStaticConveyor(b, plugin);
+					Utils.animToStaticConveyor(b);
 				}
 				else{
-					Utils.animToStaticConveyor(b, plugin);
+					Utils.animToStaticConveyor(b);
 				}}
 		}
 	}
@@ -759,20 +761,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				return true;
 			}
 		}
-		final Location cl =conveyorSnowCheker.checkConveyorAndSnow(under, p, direction, plugin);
-		if (!(cl == null)) {
-			p.setTp(false);
-			p.teleportNoEvt(to,cl.getDirection());
-			Bukkit.getScheduler().runTaskLater(plugin, new Runnable(){
-
-				@Override
-				public void run() {
-					p.setTp(true);
-					p.teleportNoChk(cl,cl.getDirection());
-				}
-			}, 2L);
-			return true;
-		} 
+		
 		bridgeChecker.checkBridge(under, p);
 
 		Boolean isTeleport = false;
@@ -959,6 +948,13 @@ public class PlayerListener extends PacketAdapter implements Listener {
 	}
 	private boolean isOwned(Player p, Hologram h) {
 		return (plugin.plotManager.getPlot(h.location).getOwner() != null && plugin.plotManager.getPlot(h.location).getOwner().compareTo(p.getUniqueId())==0);
+	}
+	public Vector getVelocity(Entity en) {
+		return lastVelocity.get(en.getUniqueId());
+	}
+	public void setVelocity(Player en, Vector v) {
+		lastVelocity.put(en.getUniqueId(), v);
+		
 	}
 
 

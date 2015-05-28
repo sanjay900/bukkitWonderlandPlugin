@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -13,14 +14,12 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 
-import com.sanjay900.wonderland.Wonderland;
+import com.sanjay900.nmsUtil.util.FaceUtil;
 import com.sanjay900.wonderland.entities.Bomb;
 import com.sanjay900.wonderland.entities.Chomper;
 import com.sanjay900.wonderland.entities.Coily;
 import com.sanjay900.wonderland.entities.WonderlandEntity;
 import com.sanjay900.wonderland.plots.WonderlandChunkGen;
-import com.sanjay900.wonderland.utils.FaceUtil;
-import com.sanjay900.wonderland.utils.MathUtil;
 
 public class EntityManager extends ConfigManager{
 	
@@ -106,7 +105,7 @@ public class EntityManager extends ConfigManager{
 
 		int id = -1;
 		for (Entry<String, WonderlandEntity> h : entities.entrySet()) {
-			if (MathUtil.isInteger(h.getKey())) {
+			if (StringUtils.isNumeric(h.getKey())) {
 				if (Integer.parseInt(h.getKey()) > id) {
 					id = Integer.parseInt(h.getKey());
 				}

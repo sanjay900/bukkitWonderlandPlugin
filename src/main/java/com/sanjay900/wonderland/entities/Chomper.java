@@ -10,9 +10,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
-import com.sanjay900.wonderland.player.WonderlandPlayer;
-import com.sanjay900.wonderland.utils.FaceUtil;
+import com.sanjay900.nmsUtil.util.FaceUtil;
 import com.sanjay900.wonderland.Wonderland;
+import com.sanjay900.wonderland.player.WonderlandPlayer;
 
 public class Chomper extends WonderlandEntity {
 	

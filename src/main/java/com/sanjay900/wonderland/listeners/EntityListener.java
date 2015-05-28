@@ -15,6 +15,7 @@ import org.bukkit.util.Vector;
 import com.sanjay900.nmsUtil.events.ArmorStandCollideEvent;
 import com.sanjay900.nmsUtil.events.ArmorStandTickEvent;
 import com.sanjay900.nmsUtil.events.FireballCollideEvent;
+import com.sanjay900.nmsUtil.util.FaceUtil;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.BlockHologram;
@@ -28,7 +29,6 @@ import com.sanjay900.wonderland.hologram.Reflector;
 import com.sanjay900.wonderland.hologram.Spike;
 import com.sanjay900.wonderland.plots.Plot;
 import com.sanjay900.wonderland.plots.Plot.PlotStatus;
-import com.sanjay900.wonderland.utils.FaceUtil;
 
 public class EntityListener implements Listener{
 	private Wonderland plugin = Wonderland.getInstance();

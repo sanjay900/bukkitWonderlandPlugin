@@ -28,7 +28,7 @@
 		</repository>
 		<repository>
 			<id>sanjay900-repo</id>
-			<url>http://ci.eyrenetwork.net/plugin/repository/everything/</url>
+			<url>http://ci.tangentnetwork.tk/plugin/repository/everything/</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -68,7 +68,7 @@
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
 			<scope>provided</scope>
-			<version>1.8.3-R0.1-SNAPSHOT</version>
+			<version>1.8.6-R0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>

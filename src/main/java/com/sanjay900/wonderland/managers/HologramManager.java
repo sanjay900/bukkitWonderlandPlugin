@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.sanjay900.nmsUtil.fallingblocks.FrozenSand;
-import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.BlockHologram;
 import com.sanjay900.wonderland.hologram.Boulder;
@@ -26,7 +26,6 @@ import com.sanjay900.wonderland.hologram.Tunnel;
 import com.sanjay900.wonderland.plots.Plot;
 import com.sanjay900.wonderland.plots.Plot.PlotType;
 import com.sanjay900.wonderland.plots.WonderlandChunkGen;
-import com.sanjay900.wonderland.utils.MathUtil;
 
 public class HologramManager extends ConfigManager{
 	public HashMap<String,Hologram> holograms = new HashMap<>();
@@ -168,7 +167,7 @@ public class HologramManager extends ConfigManager{
 
 		int id = -1;
 		for (Entry<String, Hologram> h : holograms.entrySet()) {
-			if (MathUtil.isInteger(h.getKey())) {
+			if (StringUtils.isNumeric(h.getKey())) {
 				if (Integer.parseInt(h.getKey()) > id) {
 					id = Integer.parseInt(h.getKey());
 				}

@@ -12,9 +12,9 @@ import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 
-import com.sanjay900.wonderland.player.WonderlandPlayer;
-import com.sanjay900.wonderland.utils.FaceUtil;
+import com.sanjay900.nmsUtil.util.FaceUtil;
 import com.sanjay900.wonderland.Wonderland;
+import com.sanjay900.wonderland.player.WonderlandPlayer;
 import com.sanjay900.wonderland.utils.Utils;
 
 public class Coily extends WonderlandEntity {
