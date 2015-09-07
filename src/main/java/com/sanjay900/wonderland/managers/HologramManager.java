@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitTask;
 
 import com.sanjay900.nmsUtil.fallingblocks.FrozenSand;
+import com.sanjay900.puzzleapi.worldgen.PlotChunkGenerator;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.BlockHologram;
 import com.sanjay900.wonderland.hologram.Boulder;
@@ -24,8 +25,7 @@ import com.sanjay900.wonderland.hologram.Reflector;
 import com.sanjay900.wonderland.hologram.Spike;
 import com.sanjay900.wonderland.hologram.Tunnel;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.Plot.PlotType;
-import com.sanjay900.wonderland.plots.WonderlandChunkGen;
+import com.sanjay900.wonderland.plots.PlotType;
 
 public class HologramManager extends ConfigManager{
 	public HashMap<String,Hologram> holograms = new HashMap<>();
@@ -87,7 +87,7 @@ public class HologramManager extends ConfigManager{
 				String path = "holograms."+key;
 				String world = config.getString(path+"."+"world");
 				Location loc = config.getVector(path+"."+"loc").toLocation(Bukkit.getWorld(world));
-				if (Bukkit.getWorld(world) == null || !(Bukkit.getWorld(world).getGenerator() instanceof WonderlandChunkGen)) {
+				if (Bukkit.getWorld(world) == null || !(Bukkit.getWorld(world).getGenerator() instanceof PlotChunkGenerator)) {
 					continue;
 				}
 				String type = config.getString(path+"."+"type");
@@ -126,9 +126,7 @@ public class HologramManager extends ConfigManager{
 				holograms.put(key,h);
 				Plot p = plugin.plotManager.getPlot(loc);
 				if (p != null) {
-					ArrayList<Hologram> holos = p.getHolograms();
-					holos.add(h);
-					p.setHolograms(holos);
+					p.addObject(h);
 				}
 			}
 		}
@@ -177,9 +175,10 @@ public class HologramManager extends ConfigManager{
 
 		saveHologram(hologram,String.valueOf(id));
 		holograms.put(String.valueOf(id), hologram);
-		ArrayList<Hologram> holos = plugin.plotManager.getPlot(hologram.location).getHolograms();
-		holos.add(hologram);
-		plugin.plotManager.getPlot(hologram.location).setHolograms(holos);
+		Plot p = plugin.plotManager.getPlot(hologram.location);
+		if (p != null) {
+			p.addObject(hologram);
+		}
 	}
 	public void saveHologram(Hologram hologram, String id) {
 		String path = "holograms."+id;

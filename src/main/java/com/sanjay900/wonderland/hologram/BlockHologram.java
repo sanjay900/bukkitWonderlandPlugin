@@ -11,7 +11,7 @@ public class BlockHologram extends Hologram{
 	}
 	public BlockHologram(Wonderland plugin, Location location, String id,
 			HologramType type) {
-		super(plugin, location, Integer.valueOf(id.split(":")[0]), id.split(":").length>1?Integer.valueOf(id.split(":")[1]):0, type);
+		super(location, Integer.valueOf(id.split(":")[0]), id.split(":").length>1?Integer.valueOf(id.split(":")[1]):0, type);
 	}
 	@SuppressWarnings("deprecation")
 	public void setMaterial(Material mt) {

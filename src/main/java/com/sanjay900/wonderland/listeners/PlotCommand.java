@@ -22,10 +22,10 @@ import org.bukkit.conversations.Prompt;
 import org.bukkit.conversations.StringPrompt;
 import org.bukkit.entity.Player;
 
+import com.sanjay900.puzzleapi.worldgen.PlotChunkGenerator;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.Plot.PlotType;
-import com.sanjay900.wonderland.plots.WonderlandChunkGen;
+import com.sanjay900.wonderland.plots.PlotType;
 
 public class PlotCommand implements CommandExecutor {
 	Wonderland plugin = Wonderland.getInstance();
@@ -42,7 +42,7 @@ public class PlotCommand implements CommandExecutor {
 			String[] args) {
 		Plot plot = plugin.plotManager.getPlotInside(((Player) sender).getLocation());
 		World world = ((Player) sender).getWorld();
-		if (!(world.getGenerator() instanceof WonderlandChunkGen)) {
+		if (!(world.getGenerator() instanceof PlotChunkGenerator)) {
 			sender.sendMessage("The "+ChatColor.BLUE+"plot"+ChatColor.RESET+" command can only be used on a plot world.");
 			return true;
 		}

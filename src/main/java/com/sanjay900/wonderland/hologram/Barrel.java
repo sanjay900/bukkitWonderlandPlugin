@@ -9,7 +9,7 @@ import com.sanjay900.wonderland.Wonderland;
 public class Barrel extends Hologram{
 
 	public Barrel(Wonderland plugin, Location location) {
-		super(plugin, location, 46,0, HologramType.Barrel);
+		super(location, 46,0, HologramType.Barrel);
 		}
 
 	public void detonate() {

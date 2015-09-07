@@ -6,7 +6,7 @@ import com.sanjay900.wonderland.Wonderland;
 public class Reflector extends Hologram{
 	public ReflectorType type;
 	public Reflector(Wonderland plugin, Location location, ReflectorType type) {
-		super(plugin, location,95, getData(type), HologramType.Reflector);
+		super(location,95, getData(type), HologramType.Reflector);
 		this.type = type;
 	}
 	

@@ -1,7 +1,5 @@
 package com.sanjay900.wonderland.hologram;
 
-import java.util.HashMap;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
@@ -9,23 +7,24 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
+import com.sanjay900.puzzleapi.api.PlotObject;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.utils.Utils;
 
-public class Hologram {
+public class Hologram extends PlotObject{
 	
 	public Location location;
 	public Location slocation;
 	public ArmorStand hologram;
-	public Wonderland plugin;
+	public Wonderland plugin = Wonderland.getInstance();
 	public int id;
 	protected int data;
 	protected HologramType type;
-	public Hologram (Wonderland plugin, Location location, int id, int data, HologramType type) {
+	public Hologram (Location location, int id, int data, HologramType type) {
+		super(true);
 		this.type = type;
 		this.id = id;
 		this.data = data;
-		this.plugin = plugin;
 		location=location.getBlock().getLocation().add(0.5, 0, 0.5);
 		this.location = location;
 		this.slocation = location.clone();
@@ -73,6 +72,8 @@ public class Hologram {
 		hologram.setMetadata("hologramType", new FixedMetadataValue(plugin, this.type));
 		hologram.setMetadata("hologram", new FixedMetadataValue(plugin, this));
 		hologram.setHelmet(new ItemStack(id,0,(short) data));;
+		hologram.setSmall(true);
+		hologram.setVisible(false);
 	}
 	public void explode() {
 		if (this instanceof Barrel) {

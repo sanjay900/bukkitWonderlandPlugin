@@ -8,8 +8,8 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.sanjay900.nmsUtil.util.Cooldown;
 import com.sanjay900.wonderland.Wonderland;
-import com.sanjay900.wonderland.utils.Cooldown;
 
 public class SoundPacketHandler extends PacketAdapter{
 	
@@ -21,7 +21,6 @@ public class SoundPacketHandler extends PacketAdapter{
      public void onPacketSending(PacketEvent event) {
          PacketContainer packet = event.getPacket();
          int effectID = packet.getIntegers().read(0);
-         
          // Sound: random.click
          if (effectID == 1000) {
              int x = packet.getIntegers().read(2);

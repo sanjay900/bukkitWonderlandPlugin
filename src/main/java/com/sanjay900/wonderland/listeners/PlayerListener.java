@@ -57,7 +57,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.EnumWrappers.EntityUseAction;
 import com.google.common.collect.Sets;
 import com.sanjay900.nmsUtil.fallingblocks.FrozenSand;
+import com.sanjay900.nmsUtil.util.Cooldown;
 import com.sanjay900.nmsUtil.util.FaceUtil;
+import com.sanjay900.puzzleapi.api.Plot.PlotStatus;
+import com.sanjay900.puzzleapi.worldgen.PlotChunkGenerator;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.entities.Bomb;
 import com.sanjay900.wonderland.entities.Chomper;
@@ -83,10 +86,7 @@ import com.sanjay900.wonderland.listeners.listenerChck.BridgeChecker;
 import com.sanjay900.wonderland.listeners.listenerChck.ConveyorSnowChecker;
 import com.sanjay900.wonderland.player.WonderlandPlayer;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.Plot.PlotStatus;
-import com.sanjay900.wonderland.plots.Plot.PlotType;
-import com.sanjay900.wonderland.plots.WonderlandChunkGen;
-import com.sanjay900.wonderland.utils.Cooldown;
+import com.sanjay900.wonderland.plots.PlotType;
 import com.sanjay900.wonderland.utils.Utils;
 
 @SuppressWarnings("unused")
@@ -102,13 +102,9 @@ public class PlayerListener extends PacketAdapter implements Listener {
 		super(plugin,
 				ListenerPriority.NORMAL, 
 				PacketType.Play.Client.USE_ENTITY);
-
 		this.conveyorSnowCheker = new ConveyorSnowChecker();
 		this.bridgeChecker = new BridgeChecker(plugin);
 		eco = new ElectroConversation(plugin);
-
-
-
 	}
 
 	public HashMap<Block, Byte> panes = new HashMap<>();
@@ -125,14 +121,14 @@ public class PlayerListener extends PacketAdapter implements Listener {
 	public void pickup(final PlayerPickupItemEvent event) {
 		if (!event.getItem().getVehicle().hasMetadata("hologramType")) {
 			event.setCancelled(true);
-			
+
 		}
 	}
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void blockPlace(final BlockPlaceEvent event) {
 		Plot plot = plugin.plotManager.getPlotInside(event.getBlock().getLocation());
-		if (!(event.getBlockPlaced().getWorld().getGenerator() instanceof WonderlandChunkGen)) {
+		if (!(event.getBlockPlaced().getWorld().getGenerator() instanceof PlotChunkGenerator)) {
 			return;
 		}
 		if (plot == null || event.getBlockPlaced().getY() >= 25) {
@@ -244,8 +240,9 @@ public class PlayerListener extends PacketAdapter implements Listener {
 
 	@EventHandler 
 	public void playerMove(PlayerMoveEvent evt) {
-		lastVelocity.put(evt.getPlayer().getUniqueId(), evt.getTo().toVector().subtract(evt.getFrom().toVector()));
-		if (evt.getTo().getWorld().getGenerator() instanceof WonderlandChunkGen&&plugin.playerManager.getPlayer(evt.getPlayer())== null) {
+		if (evt.getTo().getWorld().getGenerator() instanceof PlotChunkGenerator&&plugin.playerManager.getPlayer(evt.getPlayer())== null) {
+
+
 			Plot plot = plugin.plotManager.getPlotInside(evt.getTo());
 
 			if (plot != null && plot.getType().getRoof() != null) {
@@ -262,7 +259,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				String helper;
 				if (plot != null) {
 					owner = plot==null?"":(plot.getOwner()==null?"Nobody":Bukkit.getPlayer(plot.getOwner())!=null?Bukkit.getPlayer(plot.getOwner()).getName():"Unknown");
-					type = plot.getType().name().toLowerCase();
+					type = plot.getType().getName().toLowerCase();
 					coords = plot.getCoordX()+","+plot.getCoordZ();
 					title = plot.getTitle().length()>16?plot.getTitle().substring(0, 16):plot.getTitle();
 					helper = plot.getHelpers().contains(evt.getPlayer().getUniqueId())+"";
@@ -304,7 +301,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				team.setSuffix(plot==null?"":(plot.getOwner()==null?"Nobody":Bukkit.getPlayer(plot.getOwner())!=null?Bukkit.getPlayer(plot.getOwner()).getName():"Unknown"));
 				team = board.registerNewTeam("type");
 				team.addEntry("Type: ");
-				team.setSuffix(plot==null?"":plot.getType().name().toLowerCase());
+				team.setSuffix(plot==null?"":plot.getType().getName().toLowerCase());
 				team = board.registerNewTeam("coords");
 				team.addEntry("Coordinates: ");
 				team.setSuffix(plot==null?"":plot.getCoordX()+","+plot.getCoordZ());
@@ -317,11 +314,8 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				evt.getPlayer().setScoreboard(board);
 				hasScoreboard.add(evt.getPlayer());
 			}
-		} else {
-			if (hasScoreboard.contains(evt.getPlayer())) {
-				evt.getPlayer().setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-				hasScoreboard.remove(evt.getPlayer());
-			}
+		} else if (plugin.playerManager.getPlayer(evt.getPlayer())!= null){
+			Utils.getNearbyLiquids(evt.getTo(), 5).forEach(b -> evt.getPlayer().sendBlockChange(b.getLocation(),Material.BARRIER.getId(),(byte) 0));
 		}
 	}
 	@EventHandler
@@ -415,7 +409,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 	@EventHandler
 	public void BlockBreak(BlockBreakEvent evt) {
 		Plot plot = plugin.plotManager.getPlotInside(evt.getBlock().getLocation());
-		if (!(evt.getBlock().getWorld().getGenerator() instanceof WonderlandChunkGen)) {
+		if (!(evt.getBlock().getWorld().getGenerator() instanceof PlotChunkGenerator)) {
 			return;
 		}
 		if (plot == null || evt.getBlock().getLocation().getBlockY() >= 25 || evt.getBlock().getLocation().getBlockY() < 2) {
@@ -761,7 +755,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				return true;
 			}
 		}
-		
+
 		bridgeChecker.checkBridge(under, p);
 
 		Boolean isTeleport = false;
@@ -843,7 +837,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 			if (plugin.playerManager.getPlayer(p)!= null) {
 				Scoreboard board = p.getScoreboard();
 				String owner = plot.getOwner()==null?"Nobody":Bukkit.getPlayer(plot.getOwner()).getName();
-				String type = plot.getType().name().toLowerCase();
+				String type = plot.getType().getName().toLowerCase();
 				String coords = plot.getCoordX()+","+plot.getCoordZ();
 				String title = plot.getTitle().length()>16?plot.getTitle().substring(0, 16):plot.getTitle();
 				Team team = board.getTeam("coords");
@@ -862,7 +856,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 			}
 			Scoreboard board = p.getScoreboard();
 			String owner = plot.getOwner()==null?"Nobody":Bukkit.getPlayer(plot.getOwner()).getName();
-			String type = plot.getType().name().toLowerCase();
+			String type = plot.getType().getName().toLowerCase();
 			String coords = plot.getCoordX()+","+plot.getCoordZ();
 			String title = plot.getTitle().length()>16?plot.getTitle().substring(0, 16):plot.getTitle();
 			Team team = board.getTeam("coords");
@@ -879,72 +873,75 @@ public class PlayerListener extends PacketAdapter implements Listener {
 				team.setSuffix(title);
 		}
 	}
-	
+
 	public void onPacketReceiving(final PacketEvent event) {
 		final PacketContainer packet = event.getPacket();
-		final int entityID = packet.getIntegers().read(0);	
-		final EntityUseAction action ;
-		try {
-			action = packet.getEntityUseActions().read(0);
-		} catch (Exception ex) {
-			return;
-		}
-		if (!(event.getPlayer().getGameMode() == GameMode.CREATIVE)) return;
+		if (packet.getType() == PacketType.Play.Client.USE_ENTITY) {
+			final int entityID = packet.getIntegers().read(0);	
+			final EntityUseAction action ;
+			try {
+				action = packet.getEntityUseActions().read(0);
+			} catch (Exception ex) {
+				return;
+			}
+			if (!(event.getPlayer().getGameMode() == GameMode.CREATIVE)) return;
 
-		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
 
-			@SuppressWarnings("deprecation")
-			@Override
-			public void run() {
-				Hologram toDestroy = null;
-				for (Hologram h :plugin.hologramManager.holograms.values()) {
-					if (h.hologram.getEntityId() == entityID) {
-						if (plugin.playerManager.getPlayer(event.getPlayer())!= null ) return;
-						switch (action) {
-						case ATTACK:
-							if (isOwned(event.getPlayer(),h)) {
-								toDestroy = h;
-							}
-							break;
-						case INTERACT:
-						case INTERACT_AT:
-							if (h instanceof Spike && event.getPlayer().getInventory().getItemInHand().getType() == Material.BEDROCK) {
-								Spike spike = (Spike) h;
-								if (spike.getTime()<5)
-									spike.setTime(spike.getTime()+1);
-								else
-									spike.setTime(1L);
-								event.getPlayer().sendMessage(ChatColor.YELLOW+"Spike timer set to "+spike.getTime());
-							}
-							if (h instanceof Electro && event.getPlayer().getInventory().getItemInHand().getType() == Material.CARPET && event.getPlayer().getInventory().getItemInHand().getDurability()==(short)3) {
-								Electro electro = (Electro) h;
-								eco.startConversation(event.getPlayer(), electro);
-							}
-							FallingBlock fb = (FallingBlock)h.hologram;
-							ItemStack it = new ItemStack(fb.getMaterial(),1,(short)fb.getBlockData());
-							if (!event.getPlayer().getInventory().contains(it))
-								event.getPlayer().getInventory().addItem(it);
-							for(int i = 0; i < 9; i++) {
-								ItemStack item = event.getPlayer().getInventory().getItem(i);
-								if (item != null && item.isSimilar(it)) {
-									event.getPlayer().getInventory().setHeldItemSlot(i);
+				@SuppressWarnings("deprecation")
+				@Override
+				public void run() {
+					Hologram toDestroy = null;
+					for (Hologram h :plugin.hologramManager.holograms.values()) {
+						if (h.hologram.getEntityId() == entityID) {
+							if (plugin.playerManager.getPlayer(event.getPlayer())!= null ) return;
+							switch (action) {
+							case ATTACK:
+								if (isOwned(event.getPlayer(),h)) {
+									toDestroy = h;
 								}
+								break;
+							case INTERACT:
+							case INTERACT_AT:
+								if (h instanceof Spike && event.getPlayer().getInventory().getItemInHand().getType() == Material.BEDROCK) {
+									Spike spike = (Spike) h;
+									if (spike.getTime()<5)
+										spike.setTime(spike.getTime()+1);
+									else
+										spike.setTime(1L);
+									event.getPlayer().sendMessage(ChatColor.YELLOW+"Spike timer set to "+spike.getTime());
+								}
+								if (h instanceof Electro && event.getPlayer().getInventory().getItemInHand().getType() == Material.CARPET && event.getPlayer().getInventory().getItemInHand().getDurability()==(short)3) {
+									Electro electro = (Electro) h;
+									eco.startConversation(event.getPlayer(), electro);
+								}
+								FallingBlock fb = (FallingBlock)h.hologram;
+								ItemStack it = new ItemStack(fb.getMaterial(),1,(short)fb.getBlockData());
+								if (!event.getPlayer().getInventory().contains(it))
+									event.getPlayer().getInventory().addItem(it);
+								for(int i = 0; i < 9; i++) {
+									ItemStack item = event.getPlayer().getInventory().getItem(i);
+									if (item != null && item.isSimilar(it)) {
+										event.getPlayer().getInventory().setHeldItemSlot(i);
+									}
+								}
+								break;
 							}
-							break;
 						}
+
+					} 
+					if (toDestroy != null) toDestroy.remove();
+					WonderlandEntity en = plugin.entityManager.getEntity(entityID);
+					if (en != null && action == EntityUseAction.ATTACK) {
+						plugin.entityManager.removeEntity(en);
 					}
 
-				} 
-				if (toDestroy != null) toDestroy.remove();
-				WonderlandEntity en = plugin.entityManager.getEntity(entityID);
-				if (en != null && action == EntityUseAction.ATTACK) {
-					plugin.entityManager.removeEntity(en);
 				}
-
-
 			}
-		}
-				);
+
+
+					);
+		} 
 	}
 	private boolean isOwned(Player p, Hologram h) {
 		return (plugin.plotManager.getPlot(h.location).getOwner() != null && plugin.plotManager.getPlot(h.location).getOwner().compareTo(p.getUniqueId())==0);
@@ -954,7 +951,7 @@ public class PlayerListener extends PacketAdapter implements Listener {
 	}
 	public void setVelocity(Player en, Vector v) {
 		lastVelocity.put(en.getUniqueId(), v);
-		
+
 	}
 
 

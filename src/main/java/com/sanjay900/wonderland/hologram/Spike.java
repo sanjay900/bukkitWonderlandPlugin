@@ -21,7 +21,7 @@ public BukkitTask task;
   
   public Spike(Wonderland plugin, Location location, Long time)
   {
-    super(plugin, location,7,0, HologramType.Spike);
+    super(location,7,0, HologramType.Spike);
     this.time = time;
   }
   

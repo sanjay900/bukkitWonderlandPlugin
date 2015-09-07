@@ -1,10 +1,7 @@
 package com.sanjay900.wonderland.entities;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-
-import lombok.Getter;
-import net.citizensnpcs.api.npc.NPC;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -18,6 +15,8 @@ import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
+import com.sanjay900.puzzleapi.api.Plot.PlotStatus;
+import com.sanjay900.puzzleapi.api.PlotObject;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.BlockHologram;
@@ -27,11 +26,13 @@ import com.sanjay900.wonderland.hologram.Hologram;
 import com.sanjay900.wonderland.hologram.Reflector;
 import com.sanjay900.wonderland.player.WonderlandPlayer;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.Plot.PlotStatus;
 import com.sanjay900.wonderland.utils.Utils;
 
+import lombok.Getter;
+import net.citizensnpcs.api.npc.NPC;
+
 @Getter
-public abstract class WonderlandEntity implements Runnable {
+public abstract class WonderlandEntity extends PlotObject implements Runnable {
 	protected Wonderland plugin;
 	protected Location loc;
 	protected Location spawnLoc;
@@ -39,22 +40,18 @@ public abstract class WonderlandEntity implements Runnable {
 	protected Plot plot;
 	private BukkitTask task;
 	public WonderlandEntity(Wonderland plugin, Location loc) {
+		super(true);
 		this.plugin = plugin;
 		this.loc = loc.clone();
 		this.spawnLoc = loc.clone();
 		plot = plugin.plotManager.getPlot(loc);
-		ArrayList<WonderlandEntity> entities = plot.getEntities();
-		entities.add(this);
-		plot.setEntities(entities);
+		plot.addObject(this);
 	}
 
 	public void spawn(){
 		npc.spawn(spawnLoc);
 		loc = spawnLoc.clone();
 		task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,this, 0l, 5l);
-		ArrayList<WonderlandEntity> entities = plot.getSpawnedEntities();
-		entities.add(this);
-		plot.setSpawnedEntities(entities);
 	}
 	public void respawn() {
 		if (Bukkit.getScheduler().isCurrentlyRunning(task.getTaskId())) {
@@ -72,9 +69,6 @@ public abstract class WonderlandEntity implements Runnable {
 		npc.teleport(spawnLoc, TeleportCause.PLUGIN);
 		npc.despawn();
 		loc = spawnLoc.clone();
-		ArrayList<WonderlandEntity> entities = plot.getSpawnedEntities();
-		entities.remove(this);
-		plot.setSpawnedEntities(entities);
 
 	}
 	public Hologram getHologram(Block oldBlock) {
@@ -102,10 +96,10 @@ public abstract class WonderlandEntity implements Runnable {
 	}
 
 	public void moveNPC(Vector v) {
-		Iterator<WonderlandEntity> it = plot.getSpawnedEntities().iterator();
+		Iterator<PlotObject> it = plot.getObjects().iterator();
 		while (it.hasNext()) {
-			WonderlandEntity c = it.next();
-			if (c!=this && Utils.compareLocation(c.loc.getBlock().getLocation(), loc.getBlock().getLocation().add(v))){
+			PlotObject c = it.next();
+			if (c!=this && Utils.compareLocation(c.getLocation().getBlock().getLocation(), loc.getBlock().getLocation().add(v))){
 				return;
 			}
 		}
@@ -180,9 +174,9 @@ public abstract class WonderlandEntity implements Runnable {
 
 	public void remove() {
 		despawn();
-		ArrayList<WonderlandEntity> entities = plot.getEntities();
+		List<PlotObject> entities = plot.getObjects();
 		entities.remove(this);
-		plot.setEntities(entities);
+		plot.setObjects(entities);
 		npc.destroy();
 
 	}

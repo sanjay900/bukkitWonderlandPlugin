@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 
 import com.sanjay900.nmsUtil.util.FaceUtil;
+import com.sanjay900.puzzleapi.api.AbstractPlayer;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.Hologram;
@@ -57,9 +58,9 @@ public class Bomb extends WonderlandEntity {
 		}else {
 			to = loc.getBlock().getLocation().add(FaceUtil.faceToVector(FaceUtil.rotate(direction,2))).getBlock().getLocation();
 			if (moveEvent(to)&&!checkExplode(to)) {
-				for (WonderlandPlayer p: plot.getPlayers()) {
+				for (AbstractPlayer p: plot.getPlayers()) {
 					if (Utils.compareLocation(p.getPlayer().getLocation().getBlock().getLocation(),to)) {
-						p.reSpawn();
+						plot.respawn();
 					}
 				}
 				moveNPC(FaceUtil.faceToVector(FaceUtil.rotate(direction,2)));
@@ -74,9 +75,9 @@ public class Bomb extends WonderlandEntity {
 			despawn();
 			explode = true;
 		}
-		for (WonderlandPlayer p: plot.getPlayers()) {
+		for (AbstractPlayer p: plot.getPlayers()) {
 			if (Utils.compareLocation(p.getPlayer().getLocation().getBlock().getLocation(),to)) {
-				p.reSpawn();
+				plot.respawn();
 				explode = true;
 			}
 		}

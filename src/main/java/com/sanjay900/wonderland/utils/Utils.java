@@ -106,6 +106,7 @@ public class Utils
 		b = b.getRelative(BlockFace.UP);
 		if (b.getType() == Material.DIODE_BLOCK_OFF||b.getType() == Material.DIODE_BLOCK_ON) {
 			Diode d = (Diode) b.getState().getData();
+			if (d.getDelay() < 3) return;
 			d.setFacingDirection(d.getFacing().getOppositeFace());
 			BlockState bs = b.getState();
 			bs.setData(d);
@@ -151,6 +152,7 @@ public class Utils
 		}
 	}
 	public static Boolean getStillConveyor(Block b) {
+		b = b.getRelative(BlockFace.UP);
 		if (b.getType() == Material.DIODE_BLOCK_OFF||b.getType() == Material.DIODE_BLOCK_ON) {
 			Diode d = (Diode) b.getState().getData();
 			switch (d.getDelay()) {

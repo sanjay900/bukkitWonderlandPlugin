@@ -15,11 +15,11 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Fireball;
 
 import com.sanjay900.nmsUtil.util.FaceUtil;
+import com.sanjay900.puzzleapi.worldgen.PlotChunkGenerator;
 import com.sanjay900.wonderland.entities.Bomb;
 import com.sanjay900.wonderland.entities.Chomper;
 import com.sanjay900.wonderland.entities.Coily;
 import com.sanjay900.wonderland.entities.WonderlandEntity;
-import com.sanjay900.wonderland.plots.WonderlandChunkGen;
 
 public class EntityManager extends ConfigManager{
 	
@@ -50,7 +50,7 @@ public class EntityManager extends ConfigManager{
 			for (String key: config.getConfigurationSection("entities").getKeys(false)) {
 				String path = "entities."+key;
 				String world = config.getString(path+"."+"world");
-				if (Bukkit.getWorld(world) == null || !(Bukkit.getWorld(world).getGenerator() instanceof WonderlandChunkGen)) {
+				if (Bukkit.getWorld(world) == null || !(Bukkit.getWorld(world).getGenerator() instanceof PlotChunkGenerator)) {
 					continue;
 				}
 				Location loc = config.getVector(path+"."+"loc").toLocation(Bukkit.getWorld(world));

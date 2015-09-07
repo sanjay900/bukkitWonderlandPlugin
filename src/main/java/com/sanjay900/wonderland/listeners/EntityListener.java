@@ -16,11 +16,11 @@ import com.sanjay900.nmsUtil.events.ArmorStandCollideEvent;
 import com.sanjay900.nmsUtil.events.ArmorStandTickEvent;
 import com.sanjay900.nmsUtil.events.FireballCollideEvent;
 import com.sanjay900.nmsUtil.util.FaceUtil;
+import com.sanjay900.puzzleapi.api.Plot.PlotStatus;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Barrel;
 import com.sanjay900.wonderland.hologram.BlockHologram;
 import com.sanjay900.wonderland.hologram.Button;
-import com.sanjay900.wonderland.hologram.Button.ButtonType;
 import com.sanjay900.wonderland.hologram.Button.StarCountdown;
 import com.sanjay900.wonderland.hologram.Electro;
 import com.sanjay900.wonderland.hologram.Hologram;
@@ -28,7 +28,6 @@ import com.sanjay900.wonderland.hologram.Hologram.HologramType;
 import com.sanjay900.wonderland.hologram.Reflector;
 import com.sanjay900.wonderland.hologram.Spike;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.Plot.PlotStatus;
 
 public class EntityListener implements Listener{
 	private Wonderland plugin = Wonderland.getInstance();
@@ -48,15 +47,21 @@ public class EntityListener implements Listener{
 		if (collider instanceof Player) {
 			Player p = (Player)collider;
 			if (plugin.playerManager.getPlayer(p)== null) {
-				evt.setCancelled(true);
-				return;
+				//evt.setCancelled(true);
+				//return;
 			}
 
 		}
 		ArmorStand cube = evt.getStand();
 
 		if (collider.getType() == EntityType.PLAYER) {
-			evt.setCancelled(!playerCollision((Player)collider,cube));
+			evt.setCancelled(true);
+			if (!playerCollision((Player)collider,cube)) return;
+			Entity en = evt.getStand();
+			Vector v = en.getLocation().toVector().subtract(evt.getCollider().getLocation().toVector());
+			Location l = en.getLocation();
+			en.teleport(l);
+			en.setVelocity(v);
 
 		}
 		if (collider.getType() == EntityType.ARMOR_STAND && collider.hasMetadata("hologramType")) {
@@ -243,9 +248,6 @@ public class EntityListener implements Listener{
 		case Spike:
 		case Tunnel:
 		}
-		if (evt.getArmorStand().getLocation().add(evt.getArmorStand().getVelocity()).getBlock().getType().isSolid()) {
-			evt.getArmorStand().setVelocity(new Vector(0,0,0));
-		}
 		if ((HologramType)evt.getArmorStand().getMetadata("hologramType").get(0).value() == HologramType.Button) {
 			Button bt = (Button)getHologram(evt.getArmorStand());
 			if (bt == null) {
@@ -253,8 +255,7 @@ public class EntityListener implements Listener{
 				return;
 			}
 			boolean collision = false;
-			double dist = bt.type==ButtonType.SQUARE?-0.20000000298023224:-0.3;
-			for (Entity en: evt.getArmorStand().getNearbyEntities(dist, dist, dist)) {
+			for (Entity en: evt.getArmorStand().getNearbyEntities(0.5, 1, 0.5)) {
 				if (collision == true) {
 					break;
 				}
@@ -303,8 +304,12 @@ public class EntityListener implements Listener{
 				break;
 			case STAR:
 				if (collision) {
+					if (plugin.pl.buttonsTimers.containsKey(bt)) {
+						plugin.pl.buttonsTimers.get(bt).cancel();
+					}
 					StarCountdown st = bt.new StarCountdown();
 					st.start(10, plugin);
+					
 				}
 				break;
 

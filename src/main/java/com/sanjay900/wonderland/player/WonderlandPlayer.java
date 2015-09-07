@@ -1,9 +1,6 @@
 package com.sanjay900.wonderland.player;
 
 import java.util.ArrayList;
-import java.util.UUID;
-
-import lombok.Getter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,26 +9,26 @@ import org.bukkit.scheduler.BukkitTask;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.sanjay900.puzzleapi.api.AbstractPlayer;
+import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.hologram.Button;
 import com.sanjay900.wonderland.hologram.ItemHologram;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.Wonderland;
 
-public class WonderlandPlayer {
+import lombok.Getter;
 
-//TODO: depend on GameAPI (or whatever the fuck its called)
-	
-	private UUID player;
-	private Wonderland plugin;
+public class WonderlandPlayer extends AbstractPlayer{
+	private Wonderland plugin = Wonderland.getInstance();
 	public ArrayList<Button> toggledButtons = new ArrayList<>();
 	private Location prevLocation;
-	BukkitTask task;
-	private @Getter int playerN;
-	public WonderlandPlayer(Player p, Wonderland plugin, int playerN) {
+	BukkitTask task; 
+	@Getter
+	private int playerN;
+	public WonderlandPlayer(Player p, int playerN) {
+		super(p);
 		this.prevLocation = p.getLocation();
-		this.setPlayer(p);
+		p.setWalkSpeed(0.01f);
 		this.playerN = playerN;
-		this.plugin = plugin;
 		task = Bukkit.getScheduler().runTaskTimer(plugin, new Runnable(){
 
 			@Override
@@ -42,18 +39,14 @@ public class WonderlandPlayer {
 
 	}
 	private void updateScoreboard() {
-	
+
 
 	}
 
 	public void stopGame() {
+		getPlayer().setWalkSpeed(0.2f);
 		task.cancel();
 		getPlayer().teleport(prevLocation);
-	}
-
-
-	public Player getPlayer() {
-		return Bukkit.getPlayer(player);
 	}
 	public void reSpawn() {
 		plugin.plotManager.getPlot(this).respawn();
@@ -63,9 +56,6 @@ public class WonderlandPlayer {
 		out.writeUTF("Connect");
 		out.writeUTF("Lobby");
 		getPlayer().sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
-	}
-	public void setPlayer(Player player) {
-		this.player = player.getUniqueId();
 	}
 	public void map() {
 		//map

@@ -12,6 +12,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.sanjay900.nmsUtil.NMSUtil;
+import com.sanjay900.puzzleapi.PuzzleAPI;
+import com.sanjay900.puzzleapi.api.PlotObject;
+import com.sanjay900.puzzleapi.api.PlotTypeRegistry;
+import com.sanjay900.puzzleapi.worldgen.PlotChunkGenerator;
 import com.sanjay900.wonderland.hologram.Hologram;
 import com.sanjay900.wonderland.listeners.EntityListener;
 import com.sanjay900.wonderland.listeners.PlayerListener;
@@ -23,7 +27,7 @@ import com.sanjay900.wonderland.managers.PlayerManager;
 import com.sanjay900.wonderland.managers.PlotManager;
 import com.sanjay900.wonderland.packets.SoundPacketHandler;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.WonderlandChunkGen;
+import com.sanjay900.wonderland.plots.PlotType;
 
 public class Wonderland extends JavaPlugin {
 
@@ -36,17 +40,13 @@ public class Wonderland extends JavaPlugin {
 	public NMSUtil nmsutils;
 	@Getter
 	public static Wonderland instance;
-	@Override
-	public ChunkGenerator getDefaultWorldGenerator(String worldName, String id)
-	{
-		return new WonderlandChunkGen(worldName,id,this);
-	}
-
+	
 	@Override
 	public void onEnable() {
 		instance = this;
 		getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 			public void run() {
+				PlotTypeRegistry.registerPlotTypes(PlotType.class);
 				nmsutils = (NMSUtil) Bukkit.getPluginManager().getPlugin("nmsUtils");
 				NPCRegistry registry = CitizensAPI.getNPCRegistry();
 				registry.deregisterAll();
@@ -79,8 +79,9 @@ public class Wonderland extends JavaPlugin {
 		ProtocolLibrary.getProtocolManager().removePacketListeners(this);
 		ArrayList<Hologram> hs = new ArrayList<>();
 		for (Plot p : plotManager.plots) {
-			for (Hologram h : p.getHolograms()) {
-				hs.add(h);
+			for (PlotObject h : p.getObjects()) {
+				if (h instanceof Hologram)
+				hs.add((Hologram) h);
 			}
 		}
 		for (Hologram h : hs) {

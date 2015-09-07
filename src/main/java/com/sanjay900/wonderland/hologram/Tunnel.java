@@ -4,7 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.material.MaterialData;
 
 import com.sanjay900.wonderland.Wonderland;
-import com.sanjay900.wonderland.plots.Plot.PlotType;
+import com.sanjay900.wonderland.plots.PlotType;
 
 public class Tunnel extends BlockHologram{
 

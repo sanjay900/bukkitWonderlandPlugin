@@ -5,6 +5,9 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.EulerAngle;
 
 import com.sanjay900.wonderland.Wonderland;
 
@@ -14,7 +17,7 @@ public class Button extends Hologram{
 	public ButtonColour stColour;
 	
 	public Button(Wonderland plugin, ButtonType type, ButtonColour colour, Location location) {
-		super(plugin, location, getMaterial(type, colour).getId(),getColour(type, colour).getData(), HologramType.Button);
+		super(location, getMaterial(type, colour).getId(),getColour(type, colour).getData(), HologramType.Button);
 		this.type = type;
 		this.colour = this.stColour = colour;
 	}
@@ -28,10 +31,9 @@ public class Button extends Hologram{
 		} else {
 			this.colour = this.stColour;
 		}
-		this.despawn();
 		this.id = getMaterial().getId();
 		this.data = getColour().getData();
-		this.spawn();
+		hologram.setHelmet(new ItemStack(id,0,(short) data));
 	}
 	public void toggle() {
 		setPushed(this.colour == this.stColour);
@@ -220,20 +222,19 @@ public class Button extends Hologram{
 	}
 	public class StarCountdown
 	{
-		public int countdownTimer;
+		public BukkitTask bt;
+		public BukkitTask bt2;
 		private Wonderland plugin;
 		public void start(final int time, Wonderland plugin) {
 			this.plugin = plugin;
 			Button.this.setPushed(true);
 			plugin.pl.buttonsTimers.put(Button.this,this);
-			this.countdownTimer = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable()
+			this.bt = Bukkit.getServer().getScheduler().runTaskTimer(plugin, new Runnable()
 			{
 				int i = time;
 				public void run()
 				{	
-					
-					Button.this.location.getBlock().getRelative(BlockFace.DOWN).setType(Material.REDSTONE_BLOCK);
-
+					//TODO: toggle ALL gates.
 					this.i--;
 					if (this.i < -1)
 					{
@@ -242,21 +243,29 @@ public class Button extends Hologram{
 				}
 			}
 			, 0L, 20L);
+			this.bt2 = Bukkit.getServer().getScheduler().runTaskTimer(plugin, new Runnable()
+			{
+				double interval = Math.toRadians(360d/20d/(double)time);
+				public void run()
+				{	
+					EulerAngle ea = Button.this.hologram.getHeadPose();
+					ea = ea.setY(ea.getY()-interval);
+					Button.this.hologram.setHeadPose(ea);
+				}
+			}
+			, 0L, 1L);
 		}
 		
 		public void cancel()
 		{
-			if (plugin.pl.buttonsTimers.get(Button.this) != null && plugin.pl.buttonsTimers.get(Button.this).countdownTimer == this.countdownTimer) {
+			if (plugin.pl.buttonsTimers.containsValue(this)) {
+				//TODO: toggle ALL gates.
 				plugin.pl.buttonsTimers.remove(Button.this);
-				Bukkit.getScheduler().cancelTask(this.countdownTimer);
-
-				Button.this.location.getBlock().getRelative(BlockFace.DOWN).setType(Material.EMERALD_BLOCK);
 				Button.this.setPushed(false);
+				Button.this.hologram.setHeadPose(new EulerAngle(0,0,0));
+				bt.cancel();
+				bt2.cancel();
 			}
-			
-
-
-
 		}
 	}
 }

@@ -8,12 +8,12 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import com.sanjay900.wonderland.Wonderland;
+import com.sanjay900.puzzleapi.api.Plot.PlotLocation;
+import com.sanjay900.puzzleapi.worldgen.PlotChunkGenerator;
+import com.sanjay900.wonderland.hologram.Star;
 import com.sanjay900.wonderland.player.WonderlandPlayer;
 import com.sanjay900.wonderland.plots.Plot;
-import com.sanjay900.wonderland.plots.Plot.PlotLocation;
-import com.sanjay900.wonderland.plots.WonderlandChunkGen;
-import com.sanjay900.wonderland.plots.Plot.PlotType;
+import com.sanjay900.wonderland.plots.PlotType;
 
 public class PlotManager extends ConfigManager{
 	public ArrayList<Plot> plots = new ArrayList<>();
@@ -55,7 +55,7 @@ public class PlotManager extends ConfigManager{
 		return p;
 	}
 	public Plot getPlot(Location loc) {
-		if (!(loc.getWorld().getGenerator() instanceof WonderlandChunkGen)) return null;
+		if (!(loc.getWorld().getGenerator() instanceof PlotChunkGenerator)) return null;
 		for (Plot p : plots) {
 			if (p.hasLocation(loc) != PlotLocation.NONE) {
 				return p;
@@ -66,7 +66,7 @@ public class PlotManager extends ConfigManager{
 		return p;
 	}
 	public Plot getPlotWall(Location loc) {
-		if (!(loc.getWorld().getGenerator() instanceof WonderlandChunkGen)) return null;
+		if (!(loc.getWorld().getGenerator() instanceof PlotChunkGenerator)) return null;
 		if (getPlot(loc).hasLocation(loc)==PlotLocation.WALL) {
 			return getPlot(loc);
 		}
@@ -74,7 +74,7 @@ public class PlotManager extends ConfigManager{
 		return null;
 	}
 	public Plot getPlotInside(Location loc) {
-		if (!(loc.getWorld().getGenerator() instanceof WonderlandChunkGen)) return null;
+		if (!(loc.getWorld().getGenerator() instanceof PlotChunkGenerator)) return null;
 		if (getPlot(loc).hasLocation(loc)==PlotLocation.INPLOT) {
 			return getPlot(loc);
 		}
@@ -96,7 +96,7 @@ public class PlotManager extends ConfigManager{
 	public void loadConfig() {
 		if (!config.contains("plot")) return;
 		for (String world: config.getConfigurationSection("plot").getKeys(false)) {
-			if (Bukkit.getWorld(world) == null || !(Bukkit.getWorld(world).getGenerator() instanceof WonderlandChunkGen)) {
+			if (Bukkit.getWorld(world) == null || !(Bukkit.getWorld(world).getGenerator() instanceof PlotChunkGenerator)) {
 				System.out.println(world);
 				continue;
 			}
@@ -129,11 +129,11 @@ public class PlotManager extends ConfigManager{
 		config.set(path+"."+"startLoc2", plot.getPlayerCount() >=2?plot.getStartLoc()[1].toVector():plot.getStartLoc()[0].toVector());
 		config.set(path+"."+"startLoc3", plot.getPlayerCount() >=3?plot.getStartLoc()[2].toVector():plot.getStartLoc()[0].toVector());
 		config.set(path+"."+"startLoc4", plot.getPlayerCount() ==4?plot.getStartLoc()[3].toVector():plot.getStartLoc()[0].toVector());
-		config.set(path+"."+"type", plot.getType().name());
+		config.set(path+"."+"type", plot.getType().getName());
 		config.set(path+"."+"title", plot.getTitle());
 		config.set(path+"."+"subtitle", plot.getSubTitle());
-		config.set(path+"."+"stardest", plot.getStar().destination);
-		config.set(path+"."+"starloc", plot.getStar().location.toVector());
+		config.set(path+"."+"stardest", ((Star)plot.getEnd()).destination);
+		config.set(path+"."+"starloc", ((Star)plot.getEnd()).location.toVector());
 		config.set(path+"."+"helpers", plot.getHelpersString());
 		saveConfig();
 	}

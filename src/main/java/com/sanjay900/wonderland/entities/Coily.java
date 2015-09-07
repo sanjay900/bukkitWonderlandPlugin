@@ -2,20 +2,20 @@ package com.sanjay900.wonderland.entities;
 
 import java.util.Random;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.trait.RabbitType;
-import net.citizensnpcs.trait.RabbitType.RabbitTypes;
-
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
 
 import com.sanjay900.nmsUtil.util.FaceUtil;
+import com.sanjay900.puzzleapi.api.AbstractPlayer;
 import com.sanjay900.wonderland.Wonderland;
-import com.sanjay900.wonderland.player.WonderlandPlayer;
 import com.sanjay900.wonderland.utils.Utils;
+
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.trait.RabbitType;
+import net.citizensnpcs.trait.RabbitType.RabbitTypes;
 
 public class Coily extends WonderlandEntity {
 	Random r;
@@ -34,9 +34,9 @@ public class Coily extends WonderlandEntity {
 		BlockFace face = faces[r.nextInt(faces.length-1)];
 		Location to = loc.getBlock().getLocation().add(FaceUtil.faceToVector(face)).getBlock().getLocation();
 		if (moveEvent(to)) {
-			for (WonderlandPlayer p: plot.getPlayers()) {
+			for (AbstractPlayer p: plot.getPlayers()) {
 				if (Utils.compareLocation(p.getPlayer().getLocation().getBlock().getLocation(),to)) {
-					p.reSpawn();
+					plot.respawn();
 					return;
 				}
 			}

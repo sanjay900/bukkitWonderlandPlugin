@@ -1,23 +1,24 @@
 package com.sanjay900.wonderland.entities;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.trait.SlimeSize;
-
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.util.Vector;
 
 import com.sanjay900.nmsUtil.util.FaceUtil;
+import com.sanjay900.puzzleapi.api.AbstractPlayer;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.player.WonderlandPlayer;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.trait.SlimeSize;
+
 public class Chomper extends WonderlandEntity {
-	
+
 	public EntityType type;
-	
+
 	public Chomper(Wonderland plugin, Location loc, EntityType type) {
 		super(plugin,loc);
 		this.type = type;
@@ -29,15 +30,16 @@ public class Chomper extends WonderlandEntity {
 	}
 	@Override
 	public void tickEntity() {
-		for (WonderlandPlayer player: plot.getPlayers()) {
-			
-			if (type == EntityType.MAGMA_CUBE) {
-				if (player.getPlayerN() > 1) {
-					continue;
-				}
-			} else {
-				if (player.getPlayerN() == 1) {
-					continue;
+		for (AbstractPlayer player: plot.getPlayers()) {
+			if (player instanceof WonderlandPlayer) {
+				if (type == EntityType.MAGMA_CUBE) {
+					if (((WonderlandPlayer)player).getPlayerN() > 1) {
+						continue;
+					}
+				} else {
+					if (((WonderlandPlayer)player).getPlayerN() == 1) {
+						continue;
+					}
 				}
 			}
 			Vector v = new Vector(0,0,0);
@@ -49,7 +51,7 @@ public class Chomper extends WonderlandEntity {
 			v.setY(0);
 			if (slimeX != playerX) {
 				v.setX(playerX - slimeX);
-				
+
 				if (loc.clone().add(FaceUtil.faceToVector(FaceUtil.getDirection(v,false))).getBlock().getType()==Material.AIR && moveEvent(loc.getBlock().getLocation().add(FaceUtil.faceToVector(FaceUtil.getDirection(v,false))).getBlock().getLocation()))  {
 					moveNPC(FaceUtil.faceToVector(FaceUtil.getDirection(v,false)));
 
@@ -71,9 +73,8 @@ public class Chomper extends WonderlandEntity {
 					}
 				}
 			} else {
-				if (!player.isTp()) {
-					player.reSpawn();
-				}
+					plot.respawn();
+				
 			}
 			break;
 		}
