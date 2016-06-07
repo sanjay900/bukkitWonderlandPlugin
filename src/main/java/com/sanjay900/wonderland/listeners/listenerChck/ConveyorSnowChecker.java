@@ -14,7 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import com.sanjay900.nmsUtil.util.FaceUtil;
-import com.sanjay900.nmsUtil.util.V10BlockLocation;
+import com.sanjay900.nmsUtil.util.V10Block;
 import com.sanjay900.wonderland.Wonderland;
 import com.sanjay900.wonderland.utils.Utils;
 
@@ -56,7 +56,7 @@ public class ConveyorSnowChecker {
 				}
 			}}, 1l, 1l);
 	}
-	public HashMap<Entity,V10BlockLocation> flipped= new HashMap<>();
+	public HashMap<Entity,V10Block> flipped= new HashMap<>();
 	public Vector checkConveyor(Entity en) {
 		Block under = en.getLocation().getBlock().getRelative(BlockFace.DOWN);
 		final BlockFace Conveyor = Utils.getConveyor(under);
@@ -81,7 +81,7 @@ public class ConveyorSnowChecker {
 	public Vector checkConveyorAndSnow(Entity en){
 
 		Vector l = checkConveyor(en);
-		V10BlockLocation under = new V10BlockLocation(en.getLocation().getBlock().getRelative(BlockFace.DOWN));
+		V10Block under = new V10Block(en.getLocation().getBlock().getRelative(BlockFace.DOWN));
 
 		if (en instanceof Player && (!flipped.containsKey(en) || !flipped.get(en).equals(under))) {
 			if (flipped.containsKey(en)) flipped.remove(en);

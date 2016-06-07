@@ -27,12 +27,13 @@
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 		<repository>
-			<id>sanjay900-repo</id>
-			<url>http://ci.tangentnetwork.tk/plugin/repository/everything/</url>
+			<id>deployment</id>
+			<name>Eyre Repo</name>
+			<url>http://maven.tangentmc.net/content/repositories/eyre/</url>
 		</repository>
 	</repositories>
 	<dependencies>
-	<dependency>
+		<dependency>
 			<groupId>net.citizensnpcs</groupId>
 			<artifactId>citizens</artifactId>
 			<version>2.0.15-SNAPSHOT</version>
@@ -44,7 +45,7 @@
 			<version>1.14.8</version>
 			<scope>provided</scope>
 		</dependency>
-        
+
 		<dependency>
 			<groupId>com.sk89q</groupId>
 			<artifactId>worldedit</artifactId>
@@ -74,7 +75,7 @@
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot</artifactId>
 			<scope>provided</scope>
-			<version>1.8.6-R0.1-SNAPSHOT</version>
+			<version>1.8.8-R0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 	<build>
